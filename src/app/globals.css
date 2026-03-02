@@ -2,26 +2,58 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: 42 33% 98%; /* #FDFBF7 - Soft Anthropic beige */
+    --foreground: 20 14% 15%; /* #2B2523 - Very dark brown/grey */
+    --card: 0 0% 100%; /* #FFFFFF */
+    --card-foreground: 20 14% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 20 14% 15%;
+    --primary: 22 84% 53%; /* #ED6D24 - Burnt Orange / Terracotta */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 40 20% 90%; /* #EBE6E0 - Muted beige */
+    --secondary-foreground: 20 14% 15%;
+    --muted: 40 20% 94%; /* #F2EFEA - Lighter muted */
+    --muted-foreground: 25 5% 45%; /* #7A7571 - Grayish */
+    --accent: 40 20% 90%;
+    --accent-foreground: 20 14% 15%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 40 20% 88%; /* #E5DFD7 - Subtle border */
+    --input: 40 20% 88%;
+    --ring: 22 84% 53%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 24 10% 10%; /* #1C1917 - Dark warm tone */
+    --foreground: 40 20% 90%; /* #EBE6E0 */
+    --card: 24 10% 12%; /* #201D1A */
+    --card-foreground: 40 20% 90%;
+    --popover: 24 10% 12%;
+    --popover-foreground: 40 20% 90%;
+    --primary: 22 84% 53%; /* Anthropic Orange */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 24 10% 18%; /* #302A26 */
+    --secondary-foreground: 40 20% 90%;
+    --muted: 24 10% 18%;
+    --muted-foreground: 40 10% 65%;
+    --accent: 24 10% 18%;
+    --accent-foreground: 40 20% 90%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 40 20% 90%;
+    --border: 24 10% 18%;
+    --input: 24 10% 18%;
+    --ring: 22 84% 53%;
   }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-}
-
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background font-sans text-foreground antialiased selection:bg-primary selection:text-primary-foreground;
   }
 }
