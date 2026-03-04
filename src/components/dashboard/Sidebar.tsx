@@ -10,6 +10,7 @@ import {
   LogOut,
   ExternalLink,
   BarChart,
+  Users,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -21,6 +22,7 @@ const navigation = [
   { name: 'Productos', href: '/dashboard/productos', icon: Store },
   { name: 'Finanzas', href: '/dashboard/finanzas', icon: DollarSign },
   { name: 'Reportes', href: '/dashboard/reportes', icon: BarChart },
+  { name: 'Usuarios', href: '/dashboard/usuarios', icon: Users },
   { name: 'Configuración', href: '/dashboard/configuracion', icon: Settings },
 ];
 
