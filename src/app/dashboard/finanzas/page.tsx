@@ -69,7 +69,7 @@ export default async function FinanzasPage() {
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto rounded-md border border-border">
-            <Table>
+            <Table className="min-w-[700px]">
               <TableHeader>
                 <TableRow>
                   <TableHead>Fecha</TableHead>

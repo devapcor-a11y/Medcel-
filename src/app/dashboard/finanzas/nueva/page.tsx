@@ -46,6 +46,19 @@ export default async function NuevaTransaccionPage() {
     .select('id, nombre')
     .order('nombre');
 
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('centro_de_costos_id')
+    .eq('id', user?.id)
+    .single();
+
+  const defaultCajaId =
+    profile?.centro_de_costos_id ||
+    (cajas && cajas.length > 0 ? cajas[0].id : undefined);
+
   if (!cajas || cajas.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center p-12 text-center">
@@ -84,6 +97,7 @@ export default async function NuevaTransaccionPage() {
       <Card className="shadow-sm">
         <NuevaTransaccionForm
           cajas={cajas}
+          defaultCajaId={defaultCajaId}
           productos={productos || []}
           categorias={categorias || []}
           etiquetas={etiquetas || []}

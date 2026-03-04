@@ -440,7 +440,7 @@ export function ProductsDataTable({
       </div>
 
       <div className="overflow-x-auto rounded-md border border-border">
-        <Table>
+        <Table className="min-w-[800px]">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>

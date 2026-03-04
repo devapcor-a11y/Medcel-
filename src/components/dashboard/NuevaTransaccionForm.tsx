@@ -22,11 +22,13 @@ import { ProductSelector } from './ProductSelector';
 
 export default function NuevaTransaccionForm({
   cajas,
+  defaultCajaId,
   productos,
   categorias,
   etiquetas,
 }: {
   cajas: any[];
+  defaultCajaId?: string;
   productos: any[];
   categorias: any[];
   etiquetas: any[];
@@ -73,7 +75,7 @@ export default function NuevaTransaccionForm({
             <Select
               name="centro_de_costos_id"
               required
-              defaultValue={cajas[0]?.id}
+              defaultValue={defaultCajaId || cajas[0]?.id}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Seleccionar Caja" />
