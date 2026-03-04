@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { MessageCircle, ImageOff, Store } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import CatalogoSort from './CatalogoSort';
 
 interface ExchangeRate {
   venta: number;
@@ -132,7 +133,7 @@ function ProductCard({
 export default async function CatalogoPage({
   searchParams,
 }: {
-  searchParams: { categoria?: string; query?: string };
+  searchParams: { categoria?: string; query?: string; orden?: string };
 }) {
   const supabase = createClient();
   const exchangeRate = await getActiveExchangeRate(supabase);
@@ -164,8 +165,25 @@ export default async function CatalogoPage({
       )
     `
     )
-    .eq('estado', 'disponible')
-    .order('fecha_carga', { ascending: false });
+    .eq('estado', 'disponible');
+
+  // Aplicar ordenamiento
+  if (searchParams.orden === 'precio_menor') {
+    // Para simplificar asume que el precio base para ordenar es el precio en ARS o su aproximacion si está null.
+    // Como Supabase no maneja coalescences facilmente en select basicos, ordenamos usando la columna principal primero.
+    // Se recomienda ordenar por un precio base en la aplicación real.
+    supabaseQuery = supabaseQuery.order('precio_ars', {
+      ascending: true,
+      nullsFirst: false,
+    });
+  } else if (searchParams.orden === 'precio_mayor') {
+    supabaseQuery = supabaseQuery.order('precio_ars', {
+      ascending: false,
+      nullsFirst: true,
+    });
+  } else {
+    supabaseQuery = supabaseQuery.order('fecha_carga', { ascending: false });
+  }
 
   if (searchParams.categoria) {
     // First find category id by slug
@@ -248,16 +266,19 @@ export default async function CatalogoPage({
 
         {/* Product Grid */}
         <div className="min-w-0 flex-1">
-          <div className="mb-6 border-b border-border/50 pb-4">
-            <h1 className="text-2xl font-bold text-foreground">
-              {searchParams.categoria
-                ? categorias?.find((c) => c.slug === searchParams.categoria)
-                    ?.nombre || 'Catálogo'
-                : 'Todos los productos'}
-            </h1>
-            <p className="mt-1 text-muted-foreground">
-              {productos?.length || 0} productos encontrados
-            </p>
+          <div className="mb-6 flex flex-col items-start justify-between gap-4 border-b border-border/50 pb-4 sm:flex-row sm:items-end">
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">
+                {searchParams.categoria
+                  ? categorias?.find((c) => c.slug === searchParams.categoria)
+                      ?.nombre || 'Catálogo'
+                  : 'Todos los productos'}
+              </h1>
+              <p className="mt-1 text-muted-foreground">
+                {productos?.length || 0} productos encontrados
+              </p>
+            </div>
+            <CatalogoSort />
           </div>
 
           {!productos || productos.length === 0 ? (

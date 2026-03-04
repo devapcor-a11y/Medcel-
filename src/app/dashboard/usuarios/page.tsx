@@ -16,6 +16,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { EditarUsuarioModal } from './EditarUsuarioModal';
+import { NuevoUsuarioModal } from './NuevoUsuarioModal';
 
 export default async function UsuariosPage() {
   const supabase = createClient();
@@ -31,14 +32,17 @@ export default async function UsuariosPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">
-          Usuarios
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Gestiona los usuarios de la plataforma y asigna sus cajas o centros de
-          costo.
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">
+            Usuarios
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Gestiona los usuarios de la plataforma y asigna sus cajas o centros
+            de costo.
+          </p>
+        </div>
+        <NuevoUsuarioModal centros={centros || []} />
       </div>
 
       <Card className="shadow-sm">

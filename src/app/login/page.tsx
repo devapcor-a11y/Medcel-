@@ -37,12 +37,12 @@ export default function LoginPage({
               </div>
             )}
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="identifier">Email o Usuario</Label>
               <Input
-                id="email"
-                name="email"
-                type="email"
-                placeholder="juan@digibrain.com"
+                id="identifier"
+                name="identifier"
+                type="text"
+                placeholder="juan@digibrain.com o Juan"
                 required
                 className="bg-card"
               />
