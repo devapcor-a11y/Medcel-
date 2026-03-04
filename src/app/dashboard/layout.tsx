@@ -23,9 +23,9 @@ export default async function DashboardLayout({
       {/* Desktop Sidebar */}
       <Sidebar user={user} />
 
-      <main className="relative flex h-full flex-1 flex-col">
-        <div className="w-full flex-1 overflow-y-auto p-4 pb-20 md:p-8 md:pb-8">
-          <div className="mx-auto w-full max-w-6xl">{children}</div>
+      <main className="relative flex h-full min-w-0 flex-1 flex-col">
+        <div className="w-full min-w-0 flex-1 overflow-auto p-4 pb-20 md:p-8 md:pb-8">
+          <div className="mx-auto w-full min-w-0 max-w-6xl">{children}</div>
         </div>
 
         {/* Mobile Navigation */}
