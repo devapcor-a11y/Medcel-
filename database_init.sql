@@ -49,6 +49,7 @@ CREATE TABLE IF NOT EXISTS productos (
     categoria_id UUID REFERENCES categorias(id) ON DELETE SET NULL,
     precio_ars NUMERIC,
     precio_usd NUMERIC,
+    stock INTEGER DEFAULT 1,
     estado estado_producto DEFAULT 'disponible',
     fecha_carga TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
     created_by UUID REFERENCES auth.users(id),
@@ -78,7 +79,9 @@ CREATE TABLE IF NOT EXISTS transacciones (
     monto NUMERIC NOT NULL CHECK (monto >= 0),
     moneda moneda_tipo NOT NULL,
     centro_de_costos_id UUID REFERENCES centros_de_costos(id) NOT NULL,
+    centro_destino_id UUID REFERENCES centros_de_costos(id) ON DELETE SET NULL,
     producto_id UUID REFERENCES productos(id) ON DELETE SET NULL,
+    cotizacion_usd NUMERIC, -- Saved exchange rate to USD at the moment of the transaction
     descripcion TEXT,
     fecha TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
     registrada_por UUID REFERENCES auth.users(id) NOT NULL
@@ -145,20 +148,33 @@ CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
 
--- Trigger para cambiar producto a "vendido" cuando se asocia a una transaccion de venta
-CREATE OR REPLACE FUNCTION public.handle_producto_vendido()
+-- Trigger para actualizar stock y cambiar estado cuando se asocia a una transaccion
+CREATE OR REPLACE FUNCTION public.handle_transaccion_producto()
 RETURNS TRIGGER AS $$
 BEGIN
-  IF NEW.tipo = 'venta' AND NEW.producto_id IS NOT NULL THEN
-    UPDATE public.productos SET estado = 'vendido' WHERE id = NEW.producto_id;
+  IF NEW.producto_id IS NOT NULL THEN
+    IF NEW.tipo = 'venta' THEN
+      UPDATE public.productos 
+      SET stock = GREATEST(stock - 1, 0) 
+      WHERE id = NEW.producto_id;
+      
+      UPDATE public.productos 
+      SET estado = 'vendido' 
+      WHERE id = NEW.producto_id AND stock = 0;
+    ELSIF NEW.tipo = 'compra' THEN
+      UPDATE public.productos 
+      SET stock = stock + 1, estado = 'disponible' 
+      WHERE id = NEW.producto_id;
+    END IF;
   END IF;
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
-CREATE TRIGGER on_venta_registrada
+DROP TRIGGER IF EXISTS on_venta_registrada ON transacciones;
+CREATE TRIGGER on_transaccion_producto
   AFTER INSERT ON transacciones
-  FOR EACH ROW EXECUTE PROCEDURE public.handle_producto_vendido();
+  FOR EACH ROW EXECUTE PROCEDURE public.handle_transaccion_producto();
 
 -- 5. DATOS INICIALES (Configuración básica)
 INSERT INTO configuracion (clave, valor) VALUES 

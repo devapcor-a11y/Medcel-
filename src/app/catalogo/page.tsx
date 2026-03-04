@@ -1,10 +1,30 @@
 import { createClient } from '@/utils/supabase/server';
-import { fetchExchangeRate, formatArs, formatUsd } from '@/utils/currency';
+import {
+  fetchExchangeRate,
+  getActiveExchangeRate,
+  formatArs,
+  formatUsd,
+} from '@/utils/currency';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { MessageCircle, ImageOff, Store } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
+
+interface ExchangeRate {
+  venta: number;
+}
+
+interface Product {
+  id: string;
+  nombre: string;
+  precio_ars?: number | null;
+  precio_usd?: number | null;
+  categorias?: { nombre: string } | null;
+  producto_fotos?: { url: string }[];
+  productos_etiquetas?: { etiquetas: { id: string; nombre: string } }[];
+}
 
 // Simple helper component for displaying individual products in the grid
 function ProductCard({
@@ -12,20 +32,20 @@ function ProductCard({
   exchangeRate,
   config,
 }: {
-  producto: any;
-  exchangeRate: any;
+  producto: Product;
+  exchangeRate: ExchangeRate;
   config: Record<string, string>;
 }) {
   const fotos = producto.producto_fotos || [];
   const thumbnail = fotos.length > 0 ? fotos[0].url : null;
   const etiquetas =
-    producto.productos_etiquetas?.map((pe: any) => pe.etiquetas) || [];
+    producto.productos_etiquetas?.map((pe) => pe.etiquetas) || [];
 
   // Resolve prices (we ensure at least one exists via DB constraint)
   const precioArs =
-    producto.precio_ars || producto.precio_usd * exchangeRate.venta;
+    producto.precio_ars || (producto.precio_usd || 0) * exchangeRate.venta;
   const precioUsd =
-    producto.precio_usd || producto.precio_ars / exchangeRate.venta;
+    producto.precio_usd || (producto.precio_ars || 0) / exchangeRate.venta;
 
   // Parse contact number safely
   const rawContact = config['contacto_whatsapp'] || '5491100000000';
@@ -33,40 +53,52 @@ function ProductCard({
 
   return (
     <Card className="flex h-full flex-col overflow-hidden border-border/50 transition-shadow duration-200 hover:shadow-md">
-      <div className="relative flex aspect-square w-full items-center justify-center overflow-hidden bg-muted/30">
-        {thumbnail ? (
-          <img
-            src={thumbnail}
-            alt={producto.nombre}
-            className="h-full w-full object-cover"
-            loading="lazy"
-          />
-        ) : (
-          <ImageOff className="h-10 w-10 text-muted-foreground/30" />
-        )}
+      <Link
+        href={`/catalogo/${producto.id}`}
+        className="relative block focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+      >
+        <div className="relative flex aspect-square w-full items-center justify-center overflow-hidden bg-muted/30">
+          {thumbnail ? (
+            <Image
+              src={thumbnail}
+              alt={`Imagen del producto: ${producto.nombre}`}
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              className="object-cover transition-transform duration-300 hover:scale-105"
+              loading="lazy"
+            />
+          ) : (
+            <ImageOff className="h-10 w-10 text-muted-foreground/30" />
+          )}
 
-        {etiquetas.length > 0 && (
-          <div className="absolute left-2 top-2 flex max-w-[90%] flex-wrap gap-1">
-            {etiquetas.map((etiq: any) => (
-              <Badge
-                key={etiq.id}
-                variant="secondary"
-                className="border-transparent bg-background/80 text-xs backdrop-blur-sm"
-              >
-                {etiq.nombre}
-              </Badge>
-            ))}
-          </div>
-        )}
-      </div>
-
-      <CardContent className="flex flex-1 flex-col p-4">
-        <div className="mb-1 line-clamp-1 text-xs font-medium text-primary">
-          {producto.categorias?.nombre || 'Sin Categoria'}
+          {etiquetas.length > 0 && (
+            <div className="absolute left-2 top-2 flex max-w-[90%] flex-wrap gap-1">
+              {etiquetas.map((etiq: any) => (
+                <Badge
+                  key={etiq.id}
+                  variant="secondary"
+                  className="border-transparent bg-background/80 text-xs shadow-sm backdrop-blur-sm"
+                >
+                  {etiq.nombre}
+                </Badge>
+              ))}
+            </div>
+          )}
         </div>
-        <h3 className="mb-2 line-clamp-2 text-sm font-semibold leading-tight text-foreground">
-          {producto.nombre}
-        </h3>
+      </Link>
+
+      <CardContent className="flex w-full min-w-0 flex-1 flex-col p-4">
+        <Link
+          href={`/catalogo/${producto.id}`}
+          className="group block focus:outline-none"
+        >
+          <div className="mb-1 line-clamp-1 break-words text-xs font-medium text-primary group-hover:underline">
+            {producto.categorias?.nombre || 'Sin Categoria'}
+          </div>
+          <h3 className="mb-2 line-clamp-2 break-words text-sm font-semibold leading-tight text-foreground transition-colors group-hover:text-primary">
+            {producto.nombre}
+          </h3>
+        </Link>
 
         <div className="mt-auto flex flex-col gap-1 pt-2">
           <div className="text-lg font-bold text-foreground">
@@ -81,8 +113,13 @@ function ProductCard({
             size="sm"
             className="mt-4 w-full border-transparent bg-green-600 text-white hover:bg-green-700"
           >
-            <Link href={waLink} target="_blank" rel="noopener noreferrer">
-              <MessageCircle className="mr-2 h-4 w-4" />
+            <Link
+              href={waLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`Consultar por ${producto.nombre} en WhatsApp`}
+            >
+              <MessageCircle className="mr-2 h-4 w-4" aria-hidden="true" />
               Consultar
             </Link>
           </Button>
@@ -98,7 +135,7 @@ export default async function CatalogoPage({
   searchParams: { categoria?: string; query?: string };
 }) {
   const supabase = createClient();
-  const exchangeRate = await fetchExchangeRate('blue');
+  const exchangeRate = await getActiveExchangeRate(supabase);
 
   // Fetch configs
   const { data: configs } = await supabase.from('configuracion').select('*');
@@ -159,8 +196,18 @@ export default async function CatalogoPage({
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <Link
             href="/catalogo"
-            className="text-xl font-bold tracking-tight text-primary"
+            className="flex items-center gap-2 text-xl font-bold tracking-tight text-primary transition-opacity hover:opacity-80"
           >
+            {/* Filtro CSS para convertir cualquier ícono oscuro/negro a un color Naranja/Primario de la marca */}
+            <img
+              src="/favicon.ico"
+              alt="Logo"
+              className="h-6 w-6 object-contain"
+              style={{
+                filter:
+                  'brightness(0) saturate(100%) invert(58%) sepia(87%) saturate(3015%) hue-rotate(345deg) brightness(101%) contrast(100%)',
+              }}
+            />
             {nombreTienda}
           </Link>
           <div className="hidden text-xs font-medium text-muted-foreground sm:block">
@@ -170,24 +217,26 @@ export default async function CatalogoPage({
       </header>
 
       <main className="container relative mx-auto flex flex-1 flex-col gap-6 px-4 py-8 md:flex-row">
-        {/* Sidebar Filters (Desktop only roughly for now) */}
-        <aside className="hidden w-full flex-shrink-0 space-y-6 md:block md:w-64">
+        {/* Categories Horizontal Scroll (Mobile) / Sidebar (Desktop) */}
+        <aside className="w-full flex-shrink-0 md:w-64">
           <div>
-            <h3 className="mb-3 font-semibold text-foreground">Categorías</h3>
-            <ul className="max-h-[60vh] space-y-1.5 overflow-y-auto pr-2">
-              <li>
+            <h3 className="mb-3 hidden font-semibold text-foreground md:block">
+              Categorías
+            </h3>
+            <ul className="scrollbar-none flex flex-row gap-2 overflow-x-auto pb-2 md:max-h-[60vh] md:flex-col md:space-y-1.5 md:overflow-y-auto md:pr-2">
+              <li className="flex-shrink-0">
                 <Link
                   href="/catalogo"
-                  className={`block rounded-md px-3 py-1.5 text-sm transition-colors ${!searchParams.categoria ? 'bg-primary/10 font-medium text-primary' : 'text-muted-foreground hover:bg-muted'}`}
+                  className={`block rounded-md px-4 py-2 text-sm transition-colors md:px-3 md:py-1.5 ${!searchParams.categoria ? 'bg-primary/10 font-medium text-primary' : 'bg-muted/50 text-muted-foreground hover:bg-muted'}`}
                 >
-                  Todas las categorías
+                  Todas
                 </Link>
               </li>
               {categorias?.map((cat) => (
-                <li key={cat.id}>
+                <li key={cat.id} className="flex-shrink-0">
                   <Link
                     href={`/catalogo?categoria=${cat.slug}`}
-                    className={`block rounded-md px-3 py-1.5 text-sm transition-colors ${searchParams.categoria === cat.slug ? 'bg-primary/10 font-medium text-primary' : 'text-muted-foreground hover:bg-muted'}`}
+                    className={`block rounded-md px-4 py-2 text-sm transition-colors md:px-3 md:py-1.5 ${searchParams.categoria === cat.slug ? 'bg-primary/10 font-medium text-primary' : 'bg-muted/50 text-muted-foreground hover:bg-muted'}`}
                   >
                     {cat.nombre}
                   </Link>

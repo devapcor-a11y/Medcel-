@@ -16,8 +16,13 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { createClient } from '@/utils/supabase/server';
-import { addCategory, addTag, updateStoreSettings } from './actions';
-import { Tags, FolderOpen, Store } from 'lucide-react';
+import {
+  addCategory,
+  addTag,
+  updateStoreSettings,
+  addCentroCostos,
+} from './actions';
+import { Tags, FolderOpen, Store, Building2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 export default async function ConfiguracionPage() {
@@ -41,6 +46,10 @@ export default async function ConfiguracionPage() {
     .order('nombre');
   const { data: etiquetas } = await supabase
     .from('etiquetas')
+    .select('*')
+    .order('nombre');
+  const { data: centros } = await supabase
+    .from('centros_de_costos')
     .select('*')
     .order('nombre');
 
@@ -107,6 +116,7 @@ export default async function ConfiguracionPage() {
                     <SelectItem value="blue">Dólar Blue</SelectItem>
                     <SelectItem value="oficial">Dólar Oficial</SelectItem>
                     <SelectItem value="mep">Dólar MEP</SelectItem>
+                    <SelectItem value="cripto">Dólar Cripto (USDT)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -195,6 +205,48 @@ export default async function ConfiguracionPage() {
                   type="color"
                   defaultValue="#ED6D24"
                   className="h-10 w-12 cursor-pointer p-1"
+                />
+                <Button type="submit" variant="secondary">
+                  Agregar
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+
+          {/* Centros de Costos */}
+          <Card className="shadow-sm">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Building2 className="h-5 w-5" /> Cajas / Centros de Costo
+              </CardTitle>
+              <CardDescription>
+                Cajas o cuentas donde se registra el dinero (Ej: Efectivo,
+                Banco, MercadoPago).
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="mb-4 flex flex-wrap gap-2">
+                {centros?.length === 0 && (
+                  <span className="text-sm text-muted-foreground">
+                    Sin cajas
+                  </span>
+                )}
+                {centros?.map((c) => (
+                  <Badge
+                    key={c.id}
+                    variant="outline"
+                    className="border-primary/50 text-foreground"
+                  >
+                    {c.nombre}
+                  </Badge>
+                ))}
+              </div>
+              <form action={addCentroCostos} className="flex gap-2">
+                <Input
+                  name="nombre"
+                  placeholder="Nueva caja..."
+                  required
+                  className="flex-1"
                 />
                 <Button type="submit" variant="secondary">
                   Agregar

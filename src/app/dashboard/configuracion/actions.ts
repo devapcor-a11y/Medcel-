@@ -76,3 +76,27 @@ export async function updateStoreSettings(formData: FormData) {
 
   revalidatePath('/', 'layout');
 }
+
+export async function addCentroCostos(formData: FormData) {
+  const supabase = createClient();
+  const nombre = formData.get('nombre') as string;
+
+  if (!nombre) return;
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return;
+
+  const { error } = await supabase
+    .from('centros_de_costos')
+    .insert([{ nombre, usuario_id: user.id }]);
+
+  if (error) {
+    console.error('Error adding centro:', error);
+    return;
+  }
+
+  revalidatePath('/dashboard/configuracion');
+  revalidatePath('/dashboard/finanzas');
+}

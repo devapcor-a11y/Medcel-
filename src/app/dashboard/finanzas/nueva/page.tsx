@@ -20,6 +20,7 @@ import { createTransaction } from '@/app/dashboard/finanzas/actions';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import NuevaTransaccionForm from '@/components/dashboard/NuevaTransaccionForm';
 
 export default async function NuevaTransaccionPage() {
   const supabase = createClient();
@@ -29,11 +30,20 @@ export default async function NuevaTransaccionPage() {
     .from('centros_de_costos')
     .select('id, nombre');
 
-  // Fetch available products to link a transaction
   const { data: productos } = await supabase
     .from('productos')
     .select('id, nombre, precio_ars, precio_usd')
     .eq('estado', 'disponible')
+    .order('nombre');
+
+  const { data: categorias } = await supabase
+    .from('categorias')
+    .select('id, nombre')
+    .order('nombre');
+
+  const { data: etiquetas } = await supabase
+    .from('etiquetas')
+    .select('id, nombre')
     .order('nombre');
 
   if (!cajas || cajas.length === 0) {
@@ -72,116 +82,12 @@ export default async function NuevaTransaccionPage() {
       </div>
 
       <Card className="shadow-sm">
-        <form action={createTransaction}>
-          <CardHeader>
-            <CardTitle>Detalles del Movimiento</CardTitle>
-            <CardDescription>
-              Completa los campos con cuidado. Una vez registrado, podrás verlo
-              en el historial.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="tipo">Tipo de Movimiento</Label>
-                <Select name="tipo" defaultValue="venta" required>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Tipo" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="venta">Venta (Ingreso)</SelectItem>
-                    <SelectItem value="compra">Compra (Egreso)</SelectItem>
-                    <SelectItem value="gasto">
-                      Gasto / Operativo (Egreso)
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="centro_de_costos_id">Caja Afectada</Label>
-                <Select
-                  name="centro_de_costos_id"
-                  required
-                  defaultValue={cajas[0]?.id}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar Caja" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {cajas.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>
-                        {c.nombre}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="monto">Monto numérico</Label>
-                <Input
-                  name="monto"
-                  id="monto"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  required
-                  placeholder="0.00"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="moneda">Moneda de Pago</Label>
-                <Select name="moneda" defaultValue="ARS" required>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Moneda" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ARS">Pesos Argentinos (ARS)</SelectItem>
-                    <SelectItem value="USD">Dólares (USD)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="producto_id">Producto Asociado (Opcional)</Label>
-              <Select name="producto_id">
-                <SelectTrigger>
-                  <SelectValue placeholder="Elegir producto..." />
-                </SelectTrigger>
-                <SelectContent className="max-h-64">
-                  <SelectItem value="">Ninguno</SelectItem>
-                  {productos?.map((p) => (
-                    <SelectItem key={p.id} value={p.id}>
-                      {p.nombre}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <p className="text-[11px] text-muted-foreground">
-                Si relacionas una venta a un producto, éste cambiará a estado
-                'vendido' automáticamente.
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="descripcion">Descripción / Notas</Label>
-              <Input
-                name="descripcion"
-                id="descripcion"
-                placeholder="Ej: Venta auricular bluetooth a Juan"
-              />
-            </div>
-
-            <Button type="submit" className="mt-6 w-full">
-              Confirmar Transacción
-            </Button>
-          </CardContent>
-        </form>
+        <NuevaTransaccionForm
+          cajas={cajas}
+          productos={productos || []}
+          categorias={categorias || []}
+          etiquetas={etiquetas || []}
+        />
       </Card>
     </div>
   );

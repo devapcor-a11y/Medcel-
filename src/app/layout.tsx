@@ -8,8 +8,31 @@ import { Toaster as SonnerToaster } from '@/components/ui/sonner';
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
 export const metadata: Metadata = {
-  title: 'DigiBrain - PYME Management',
-  description: 'Sistema de gestión y catálogo',
+  title: {
+    default: 'DigiBrain - PYME Management',
+    template: '%s | DigiBrain',
+  },
+  description:
+    'Sistema de gestión y catálogo integral para pymes. Manejo de inventario, ventas y finanzas de manera sencilla.',
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  openGraph: {
+    title: 'DigiBrain - PYME Management',
+    description: 'Sistema de gestión y catálogo integral para pymes.',
+    url: 'https://digibrain.pyme',
+    siteName: 'DigiBrain',
+    locale: 'es_AR',
+    type: 'website',
+  },
 };
 
 export default function RootLayout({
@@ -24,7 +47,7 @@ export default function RootLayout({
       >
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
+          defaultTheme="light"
           enableSystem
           disableTransitionOnChange
         >

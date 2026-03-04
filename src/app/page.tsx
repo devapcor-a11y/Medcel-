@@ -1,10 +1,18 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'DigiBrain PYME | Gestión Integral',
+  description:
+    'Plataforma de gestión integral para venta de tecnología. Maneja inventario, ventas y balances de manera simple y eficiente.',
+  keywords: 'gestión pyme, inventario, ventas, tecnología',
+};
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-background p-8 text-center">
+    <main className="flex min-h-screen flex-col items-center justify-center bg-background p-8 text-center">
       <div className="max-w-3xl space-y-6">
         <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-6xl">
           DigiBrain <span className="text-primary">PYME</span>
@@ -17,7 +25,8 @@ export default function Home() {
         <div className="flex flex-col items-center justify-center gap-4 pt-4 sm:flex-row">
           <Button asChild size="lg" className="rounded-full px-8">
             <Link href="/login">
-              Ingresar al Panel <ArrowRight className="ml-2 h-4 w-4" />
+              Ingresar al Panel{' '}
+              <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
             </Link>
           </Button>
           <Button
@@ -30,6 +39,6 @@ export default function Home() {
           </Button>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

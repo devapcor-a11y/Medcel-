@@ -19,22 +19,28 @@ import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { Plus, Pencil, Trash2 } from 'lucide-react';
 import { formatArs, formatUsd } from '@/utils/currency';
+import DeleteTransactionButton from '@/components/dashboard/DeleteTransactionButton';
 
 export default async function FinanzasPage() {
   const supabase = createClient();
 
   // Fetch Transacciones
-  const { data: transacciones } = await supabase
+  const { data: transacciones, error } = await supabase
     .from('transacciones')
     .select(
       `
       *,
-      centros_de_costos(nombre),
+      caja:centro_de_costos_id(nombre),
+      caja_destino:centro_destino_id(nombre),
       productos(nombre)
     `
     )
     .order('fecha', { ascending: false })
     .limit(50); // Simple pagination for now
+
+  if (error) {
+    console.error('Error fetching transactions:', error);
+  }
 
   return (
     <div className="space-y-6">
@@ -62,7 +68,7 @@ export default async function FinanzasPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="rounded-md border border-border">
+          <div className="overflow-x-auto rounded-md border border-border">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -104,13 +110,18 @@ export default async function FinanzasPage() {
                           {t.tipo}
                         </Badge>
                       </TableCell>
-                      <TableCell>{t.centros_de_costos?.nombre}</TableCell>
+                      <TableCell>{t.caja?.nombre}</TableCell>
                       <TableCell>
                         <div className="flex flex-col">
                           <span>{t.descripcion || '-'}</span>
                           {t.productos?.nombre && (
                             <span className="line-clamp-1 text-xs text-muted-foreground">
                               Ref: {t.productos.nombre}
+                            </span>
+                          )}
+                          {t.caja_destino && (
+                            <span className="text-[10px] text-muted-foreground">
+                              Destino: {t.caja_destino?.nombre}
                             </span>
                           )}
                         </div>
@@ -120,7 +131,16 @@ export default async function FinanzasPage() {
                           ? formatArs(t.monto)
                           : formatUsd(t.monto)}
                       </TableCell>
-                      <TableCell>{/* Acciones */}</TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <Button variant="ghost" size="icon" asChild>
+                            <Link href={`/dashboard/finanzas/editar/${t.id}`}>
+                              <Pencil className="h-4 w-4 text-muted-foreground" />
+                            </Link>
+                          </Button>
+                          <DeleteTransactionButton id={t.id} />
+                        </div>
+                      </TableCell>
                     </TableRow>
                   ))
                 )}

@@ -9,6 +9,7 @@ import {
   Settings,
   LogOut,
   ExternalLink,
+  BarChart,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -19,6 +20,7 @@ const navigation = [
   { name: 'Resumen', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Productos', href: '/dashboard/productos', icon: Store },
   { name: 'Finanzas', href: '/dashboard/finanzas', icon: DollarSign },
+  { name: 'Reportes', href: '/dashboard/reportes', icon: BarChart },
   { name: 'Configuración', href: '/dashboard/configuracion', icon: Settings },
 ];
 
@@ -34,12 +36,24 @@ export default function Sidebar({ user }: { user: any }) {
   };
 
   return (
-    <div className="hidden min-h-screen w-64 flex-col border-r border-border bg-card md:flex">
-      <div className="border-b border-border p-6">
-        <h2 className="flex items-center text-xl font-semibold tracking-tight text-primary">
+    <aside
+      className="hidden min-h-screen w-64 flex-col border-r border-border bg-card md:flex"
+      aria-label="Sidebar"
+    >
+      <div className="border-b border-border p-6 pb-4">
+        <h2 className="flex items-center gap-2 text-xl font-bold tracking-tight text-primary">
+          <img
+            src="/favicon.ico"
+            alt="Logo"
+            className="h-6 w-6 object-contain"
+            style={{
+              filter:
+                'brightness(0) saturate(100%) invert(58%) sepia(87%) saturate(3015%) hue-rotate(345deg) brightness(101%) contrast(100%)',
+            }}
+          />
           DigiBrain
         </h2>
-        <p className="mt-1 truncate text-xs text-muted-foreground">
+        <p className="ml-8 mt-1 truncate text-xs font-medium text-muted-foreground opacity-80">
           {user?.email}
         </p>
       </div>
@@ -85,6 +99,6 @@ export default function Sidebar({ user }: { user: any }) {
           Cerrar Sesión
         </Button>
       </div>
-    </div>
+    </aside>
   );
 }

@@ -24,6 +24,7 @@ import { Badge } from '@/components/ui/badge';
 import { createClient } from '@/utils/supabase/client';
 import { v4 as uuidv4 } from 'uuid';
 import { useRouter } from 'next/navigation';
+import { createProduct } from '@/app/dashboard/productos/actions';
 
 export default function NuevoProductoForm({
   categorias,
@@ -38,6 +39,9 @@ export default function NuevoProductoForm({
   const [fotosUrls, setFotosUrls] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [categoriaId, setCategoriaId] = useState<string>('none');
+  const [estado, setEstado] = useState<string>('disponible');
+  const [isDragging, setIsDragging] = useState(false);
 
   const toggleTag = (id: string) => {
     if (selectedTags.includes(id)) {
@@ -47,40 +51,71 @@ export default function NuevoProductoForm({
     }
   };
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const processFiles = async (files: File[]) => {
     try {
       setUploading(true);
-      if (!e.target.files || e.target.files.length === 0) return;
+      if (!files || files.length === 0) return;
 
-      const file = e.target.files[0];
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${uuidv4()}.${fileExt}`;
-      const filePath = `productos/${fileName}`;
+      const newUrls: string[] = [];
 
-      // This assumes you set up a storage bucket called 'public_assets' in Supabase
-      // It will fail if the bucket is not created via SQL or dashboard manually.
-      // We'll wrap this in try-catch and alert user
-      const { error: uploadError } = await supabase.storage
-        .from('public_assets')
-        .upload(filePath, file);
+      await Promise.all(
+        files.map(async (file) => {
+          const fileExt = file.name.split('.').pop();
+          const fileName = `${uuidv4()}.${fileExt}`;
+          const filePath = `productos/${fileName}`;
 
-      if (uploadError) {
-        console.error('Error al subir', uploadError.message);
-        alert(
-          'Error al subir imagen. Verifique que creó el bucket "public_assets" en Supabase.'
-        );
-        return;
-      }
+          const { error: uploadError } = await supabase.storage
+            .from('public_assets')
+            .upload(filePath, file);
 
-      const { data } = supabase.storage
-        .from('public_assets')
-        .getPublicUrl(filePath);
-      if (data?.publicUrl) {
-        setFotosUrls([...fotosUrls, data.publicUrl]);
+          if (uploadError) {
+            console.error('Error al subir', uploadError.message);
+            alert(
+              `Error al subir imagen ${file.name} (${uploadError.message})`
+            );
+            return;
+          }
+
+          const { data } = supabase.storage
+            .from('public_assets')
+            .getPublicUrl(filePath);
+
+          if (data?.publicUrl) {
+            newUrls.push(data.publicUrl);
+          }
+        })
+      );
+
+      if (newUrls.length > 0) {
+        setFotosUrls((prev) => [...prev, ...newUrls]);
       }
     } finally {
       setUploading(false);
     }
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      await processFiles(Array.from(e.target.files));
+    }
+  };
+
+  const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+    if (e.dataTransfer.files) {
+      await processFiles(Array.from(e.dataTransfer.files));
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
   };
 
   const removeFoto = (index: number) => {
@@ -96,15 +131,13 @@ export default function NuevoProductoForm({
           selectedTags.forEach((id) => formData.append('etiquetas[]', id));
           fotosUrls.forEach((url) => formData.append('fotos[]', url));
 
-          try {
-            // Calls the server action dynamically
-            const { createProduct } =
-              await import('@/app/dashboard/productos/actions');
-            await createProduct(formData);
-          } catch (error) {
-            console.error(error);
+          // Call the server action and capture possible validation errors
+          const response = await createProduct(formData);
+          if (response?.error) {
+            alert(response.error);
             setIsSubmitting(false);
           }
+          // The form will unmount automatically if it redirects successfully.
         }}
       >
         <CardHeader>
@@ -137,12 +170,13 @@ export default function NuevoProductoForm({
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="categoria_id">Categoría</Label>
-              <Select name="categoria_id">
+              <input type="hidden" name="categoria_id" value={categoriaId} />
+              <Select value={categoriaId} onValueChange={setCategoriaId}>
                 <SelectTrigger>
                   <SelectValue placeholder="Seleccionar..." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Sin Categoría</SelectItem>
+                  <SelectItem value="none">Sin Categoría</SelectItem>
                   {categorias.map((c) => (
                     <SelectItem key={c.id} value={c.id}>
                       {c.nombre}
@@ -153,7 +187,8 @@ export default function NuevoProductoForm({
             </div>
             <div className="space-y-2">
               <Label htmlFor="estado">Estado</Label>
-              <Select name="estado" defaultValue="disponible">
+              <input type="hidden" name="estado" value={estado} />
+              <Select value={estado} onValueChange={setEstado}>
                 <SelectTrigger>
                   <SelectValue placeholder="Estado actual" />
                 </SelectTrigger>
@@ -228,7 +263,7 @@ export default function NuevoProductoForm({
                 >
                   <img
                     src={url}
-                    alt="Foto"
+                    alt={`Vista previa de la foto ${i + 1}`}
                     className="h-full w-full object-cover"
                   />
                   <button
@@ -241,23 +276,37 @@ export default function NuevoProductoForm({
                 </div>
               ))}
 
-              <Label
-                htmlFor="upload_foto"
-                className="flex h-24 w-24 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-border text-muted-foreground transition-colors hover:bg-muted"
+              <div
+                onDrop={handleDrop}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                className={`relative flex min-h-[6rem] min-w-[6rem] flex-1 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed transition-colors ${
+                  isDragging
+                    ? 'border-primary bg-primary/10'
+                    : 'border-border text-muted-foreground hover:bg-muted'
+                }`}
               >
-                <UploadCloud className="mb-1 h-6 w-6" />
-                <span className="px-1 text-center text-[10px] font-medium">
-                  {uploading ? 'Subiendo...' : 'Agregar Foto'}
-                </span>
-                <Input
-                  id="upload_foto"
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleFileUpload}
-                  disabled={uploading}
-                />
-              </Label>
+                <Label
+                  htmlFor="upload_foto"
+                  className="flex h-full w-full cursor-pointer flex-col items-center justify-center p-4"
+                >
+                  <UploadCloud className="mb-2 h-8 w-8 text-muted-foreground" />
+                  <span className="text-center text-xs font-medium">
+                    {uploading
+                      ? 'Subiendo...'
+                      : 'Arrastra imágenes o haz click'}
+                  </span>
+                  <Input
+                    id="upload_foto"
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    onChange={handleFileUpload}
+                    disabled={uploading}
+                  />
+                </Label>
+              </div>
             </div>
           </div>
 

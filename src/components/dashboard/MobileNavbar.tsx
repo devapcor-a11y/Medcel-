@@ -2,13 +2,20 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Store, DollarSign, Settings } from 'lucide-react';
+import {
+  LayoutDashboard,
+  Store,
+  DollarSign,
+  Settings,
+  BarChart,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const navigation = [
   { name: 'Resumen', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Productos', href: '/dashboard/productos', icon: Store },
   { name: 'Finanzas', href: '/dashboard/finanzas', icon: DollarSign },
+  { name: 'Reportes', href: '/dashboard/reportes', icon: BarChart },
   { name: 'Ajustes', href: '/dashboard/configuracion', icon: Settings },
 ];
 
@@ -16,7 +23,10 @@ export default function MobileNavbar() {
   const pathname = usePathname();
 
   return (
-    <div className="pb-safe fixed bottom-0 z-50 w-full border-t border-border bg-card shadow-lg md:hidden">
+    <nav
+      className="pb-safe fixed bottom-0 z-50 w-full border-t border-border bg-card shadow-lg md:hidden"
+      aria-label="Navegación Móvil"
+    >
       <div className="flex h-16 items-center justify-around px-2">
         {navigation.map((item) => {
           const isActive = pathname === item.href;
@@ -41,6 +51,6 @@ export default function MobileNavbar() {
           );
         })}
       </div>
-    </div>
+    </nav>
   );
 }
