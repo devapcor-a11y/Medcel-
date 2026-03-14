@@ -85,6 +85,7 @@ export function ProductSelector({
         categoria_id: newProdCat !== 'none' ? newProdCat : null,
         estado: 'disponible',
         created_by: user?.id,
+        stock: 0,
       })
       .select()
       .single();
