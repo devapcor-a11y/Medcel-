@@ -129,7 +129,7 @@ export default async function DashboardPage() {
     const valueUsd = t.moneda === 'USD' ? t.monto : t.monto / storedRate;
 
     if (t.tipo === 'venta') totalIngresosUsd += valueUsd;
-    if (t.tipo === 'compra' || t.tipo === 'gasto') totalEgresosUsd += valueUsd;
+    if (t.tipo === 'compra' || (t.tipo === 'gasto' && !t.ignorar_balance)) totalEgresosUsd += valueUsd;
 
     // Unitary Profit FIFO logic (Only applies if transaction has a linked product)
     if (t.producto_id) {
@@ -266,17 +266,17 @@ export default async function DashboardPage() {
             ) : (
               <div className="space-y-4">
                 {recientes.map((t) => (
-                  <div key={t.id} className="flex items-center justify-between">
-                    <div className="flex flex-col">
-                      <span className="text-sm font-medium">
+                  <div key={t.id} className="flex items-center justify-between gap-4">
+                    <div className="flex flex-col flex-1 min-w-0">
+                      <span className="truncate text-sm font-medium" title={t.descripcion || t.tipo}>
                         {t.descripcion || t.tipo}
                       </span>
-                      <span className="text-xs capitalize text-muted-foreground">
+                      <span className="truncate text-xs capitalize text-muted-foreground">
                         {t.tipo} - {new Date(t.fecha).toLocaleDateString()}
                       </span>
                     </div>
                     <span
-                      className={`text-sm font-bold ${t.tipo === 'venta' ? 'text-green-600' : t.tipo === 'gasto' || t.tipo === 'compra' ? 'text-destructive' : 'text-primary'}`}
+                      className={`flex-shrink-0 whitespace-nowrap text-sm font-bold ${t.tipo === 'venta' ? 'text-green-600' : t.tipo === 'gasto' || t.tipo === 'compra' ? 'text-destructive' : 'text-primary'}`}
                     >
                       {t.tipo === 'gasto' || t.tipo === 'compra' ? '-' : '+'}
                       {t.moneda === 'USD' ? 'u$s' : '$'} {t.monto}
@@ -370,11 +370,13 @@ export default async function DashboardPage() {
                 {profitableProducts.map((p, i) => (
                   <div
                     key={i}
-                    className="flex items-center justify-between border-b pb-2 last:border-0 last:pb-0"
+                    className="flex items-center justify-between border-b pb-2 last:border-0 last:pb-0 gap-4"
                   >
-                    <span className="text-sm font-medium">{p.nombre}</span>
+                    <span className="truncate text-sm font-medium flex-1 min-w-0" title={p.nombre}>
+                      {p.nombre}
+                    </span>
                     <span
-                      className={`text-sm font-bold ${p.utilidadUsd >= 0 ? 'text-green-600' : 'text-destructive'}`}
+                      className={`whitespace-nowrap text-sm font-bold flex-shrink-0 ${p.utilidadUsd >= 0 ? 'text-green-600' : 'text-destructive'}`}
                     >
                       {p.utilidadUsd >= 0 ? '+' : ''}
                       {formatUsd(p.utilidadUsd)}
@@ -402,11 +404,13 @@ export default async function DashboardPage() {
                 {profitableCategories.map((p, i) => (
                   <div
                     key={i}
-                    className="flex items-center justify-between border-b pb-2 last:border-0 last:pb-0"
+                    className="flex items-center justify-between border-b pb-2 last:border-0 last:pb-0 gap-4"
                   >
-                    <span className="text-sm font-medium">{p.nombre}</span>
+                    <span className="truncate text-sm font-medium flex-1 min-w-0" title={p.nombre}>
+                      {p.nombre}
+                    </span>
                     <span
-                      className={`text-sm font-bold ${p.utilidadUsd >= 0 ? 'text-green-600' : 'text-destructive'}`}
+                      className={`whitespace-nowrap text-sm font-bold flex-shrink-0 ${p.utilidadUsd >= 0 ? 'text-green-600' : 'text-destructive'}`}
                     >
                       {p.utilidadUsd >= 0 ? '+' : ''}
                       {formatUsd(p.utilidadUsd)}

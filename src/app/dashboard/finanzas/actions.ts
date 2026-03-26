@@ -30,6 +30,8 @@ export async function createTransaction(formData: FormData) {
     return;
   }
 
+  const ignorar_balance = formData.get('ignorar_balance') === 'on';
+
   const payload = {
     tipo,
     monto,
@@ -38,6 +40,7 @@ export async function createTransaction(formData: FormData) {
     centro_destino_id,
     descripcion,
     producto_id,
+    ignorar_balance: tipo === 'gasto' ? ignorar_balance : false,
     cotizacion_usd: (await getActiveExchangeRate(supabase)).venta,
     registrada_por: user.id,
   };
@@ -79,7 +82,7 @@ export async function deleteTransaction(id: string) {
   if (t.producto_id) {
     const { data: prod } = await supabase
       .from('productos')
-      .select('stock')
+      .select('stock, estado')
       .eq('id', t.producto_id)
       .single();
 
@@ -90,9 +93,13 @@ export async function deleteTransaction(id: string) {
           .update({ stock: prod.stock + 1, estado: 'disponible' })
           .eq('id', t.producto_id);
       } else if (t.tipo === 'compra') {
+        const stockActual = prod.stock;
+        const newStock = Math.max(0, stockActual - 1);
+        let newEstado = prod.estado;
+        if (newStock === 0) newEstado = 'vendido';
         await supabase
           .from('productos')
-          .update({ stock: Math.max(0, prod.stock - 1) })
+          .update({ stock: newStock, estado: newEstado })
           .eq('id', t.producto_id);
       }
     }
@@ -131,6 +138,20 @@ export async function updateTransaction(formData: FormData) {
     return;
   }
 
+  // Recupera la transacción original para comparar cambios que afecten stock
+  const { data: oldTx } = await supabase
+    .from('transacciones')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (!oldTx) {
+    console.error('No se encontró la transacción original');
+    return;
+  }
+
+  const ignorar_balance = formData.get('ignorar_balance') === 'on';
+
   const payload = {
     tipo,
     monto,
@@ -138,6 +159,7 @@ export async function updateTransaction(formData: FormData) {
     centro_de_costos_id,
     centro_destino_id,
     descripcion,
+    ignorar_balance: tipo === 'gasto' ? ignorar_balance : false,
   };
 
   const { error } = await supabase
@@ -148,6 +170,42 @@ export async function updateTransaction(formData: FormData) {
   if (error) {
     console.error(error.message);
     return;
+  }
+
+  // Reconciliar stock si el tipo de movimiento cambió y está asociado a un producto
+  if (oldTx.producto_id && oldTx.tipo !== tipo) {
+    const { data: prod } = await supabase
+      .from('productos')
+      .select('stock, estado')
+      .eq('id', oldTx.producto_id)
+      .single();
+
+    if (prod) {
+      let stockChange = 0;
+
+      // Reversar efecto del tipo de transacción anterior
+      if (oldTx.tipo === 'venta') stockChange += 1;
+      else if (oldTx.tipo === 'compra') stockChange -= 1;
+
+      // Aplicar efecto del nuevo tipo de transacción
+      if (tipo === 'venta') stockChange -= 1;
+      else if (tipo === 'compra') stockChange += 1;
+
+      if (stockChange !== 0) {
+        const newStock = Math.max(0, prod.stock + stockChange);
+        let newEstado = prod.estado;
+
+        if (newStock === 0) newEstado = 'vendido';
+        else if (newStock > 0 && prod.estado === 'vendido') {
+          newEstado = 'disponible';
+        }
+
+        await supabase
+          .from('productos')
+          .update({ stock: newStock, estado: newEstado })
+          .eq('id', oldTx.producto_id);
+      }
+    }
   }
 
   // Reload cache globally

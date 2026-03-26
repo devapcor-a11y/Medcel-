@@ -12,6 +12,7 @@ import { MessageCircle, ImageOff, Store } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import CatalogoSort from './CatalogoSort';
+import CatalogoCondicion from './CatalogoCondicion';
 
 interface ExchangeRate {
   venta: number;
@@ -133,7 +134,7 @@ function ProductCard({
 export default async function CatalogoPage({
   searchParams,
 }: {
-  searchParams: { categoria?: string; query?: string; orden?: string };
+  searchParams: { categoria?: string; query?: string; orden?: string; condicion?: string };
 }) {
   const supabase = createClient();
   const exchangeRate = await getActiveExchangeRate(supabase);
@@ -199,6 +200,20 @@ export default async function CatalogoPage({
 
   if (searchParams.query) {
     supabaseQuery = supabaseQuery.ilike('nombre', `%${searchParams.query}%`);
+  }
+
+  // Filter based on tags (etiquetas)
+  if (searchParams.condicion) {
+    const { data: peData } = await supabase
+      .from('productos_etiquetas')
+      .select('producto_id, etiquetas!inner(slug)')
+      .eq('etiquetas.slug', searchParams.condicion);
+
+    if (peData) {
+      const pids = peData.map((d: any) => d.producto_id);
+      // Fallback to a non-existent UUID if the list is empty, ensuring the query returns nothing safely.
+      supabaseQuery = supabaseQuery.in('id', pids.length > 0 ? pids : ['00000000-0000-0000-0000-000000000000']);
+    }
   }
 
   const { data: productos, error } = await supabaseQuery;
@@ -278,7 +293,10 @@ export default async function CatalogoPage({
                 {productos?.length || 0} productos encontrados
               </p>
             </div>
-            <CatalogoSort />
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <CatalogoCondicion />
+              <CatalogoSort />
+            </div>
           </div>
 
           {!productos || productos.length === 0 ? (

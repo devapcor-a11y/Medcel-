@@ -80,7 +80,7 @@ export default async function ReportesPage({
     if (isWithinRange) {
       transactionsInRange.push(t);
       if (t.tipo === 'venta') totalIngresosUsd += valueUsd;
-      if (t.tipo === 'compra' || t.tipo === 'gasto')
+      if (t.tipo === 'compra' || (t.tipo === 'gasto' && !t.ignorar_balance))
         totalEgresosUsd += valueUsd;
     }
 

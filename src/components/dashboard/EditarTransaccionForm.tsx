@@ -10,6 +10,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Select,
   SelectContent,
@@ -141,6 +142,25 @@ export default function EditarTransaccionForm({
             </Select>
           </div>
         </div>
+
+        {tipoMovimiento === 'gasto' && (
+          <div className="flex items-center space-x-2 rounded-md border p-4 shadow-sm">
+            <Checkbox
+              id="ignorar_balance"
+              name="ignorar_balance"
+              defaultChecked={transaccion.ignorar_balance}
+            />
+            <div className="space-y-1">
+              <Label htmlFor="ignorar_balance" className="font-medium cursor-pointer">
+                Ignorar en Rentabilidad
+              </Label>
+              <p className="text-[11px] text-muted-foreground">
+                Si activas esto, este gasto no restará en los cálculos de
+                rentabilidad (dashboards y reportes).
+              </p>
+            </div>
+          </div>
+        )}
 
         <div className="space-y-2">
           <Label htmlFor="producto_id">Producto Asociado (Opcional)</Label>
