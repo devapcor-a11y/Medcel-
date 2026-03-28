@@ -14,6 +14,42 @@ import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card';
 import { ProductImageGallery } from '@/components/catalogo/ProductImageGallery';
+import type { Metadata } from 'next';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: { id: string };
+}): Promise<Metadata> {
+  const supabase = createClient();
+  const { data: product } = await supabase
+    .from('productos')
+    .select('nombre, descripcion, producto_fotos(url)')
+    .eq('id', params.id)
+    .single();
+
+  if (!product) return { title: 'Producto no encontrado' };
+
+  const mainImage = product.producto_fotos?.[0]?.url || '/opengraph-image.png';
+
+  return {
+    title: product.nombre,
+    description: product.descripcion || 'Mira este producto en nuestro catálogo.',
+    openGraph: {
+      title: product.nombre,
+      description:
+        product.descripcion || 'Mira este producto en nuestro catálogo.',
+      images: [
+        {
+          url: mainImage,
+          width: 500,
+          height: 500,
+          alt: product.nombre,
+        },
+      ],
+    },
+  };
+}
 
 export default async function DetalleProductoPublicoPage({
   params,
