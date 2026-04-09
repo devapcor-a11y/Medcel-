@@ -27,6 +27,8 @@ export async function createProduct(formData: FormData) {
   // Extract photo URLs and tags (these need to be processed on client first and passed as strings)
   const etiquetas = formData.getAll('etiquetas[]') as string[];
   const fotosUrls = formData.getAll('fotos[]') as string[];
+  const talles = formData.getAll('talles[]') as string[];
+  const stocks = formData.getAll('stocks[]') as string[];
 
   if (!nombre || (!precio_ars && !precio_usd)) {
     return { error: 'Nombre y al menos un precio son requeridos.' };
@@ -40,6 +42,7 @@ export async function createProduct(formData: FormData) {
     precio_ars,
     precio_usd,
     estado,
+    stock: stocks.reduce((acc, current) => acc + parseInt(current || '0', 10), 0),
     created_by: user.id,
   };
 
@@ -70,8 +73,18 @@ export async function createProduct(formData: FormData) {
     await supabase.from('producto_fotos').insert(pFotos);
   }
 
+  // 4. Insert variantes (Talles y cant)
+  if (talles.length > 0) {
+    const pVariantes = talles.map((talle, i) => ({
+      producto_id,
+      talle: talle || 'Único',
+      stock: parseInt(stocks[i] || '0', 10)
+    }));
+    await supabase.from('producto_variantes').insert(pVariantes);
+  }
+
   revalidatePath('/dashboard/productos');
-  revalidatePath('/catalogo');
+  revalidatePath('/productos');
 
   redirect('/dashboard/productos');
 }
@@ -146,7 +159,7 @@ export async function updateProduct(formData: FormData) {
   }
 
   revalidatePath('/dashboard/productos');
-  revalidatePath('/catalogo');
+  revalidatePath('/productos');
 
   redirect('/dashboard/productos');
 }
@@ -179,6 +192,6 @@ export async function deleteProduct(id: string) {
   }
 
   revalidatePath('/dashboard/productos');
-  revalidatePath('/catalogo');
+  revalidatePath('/productos');
   return { success: true };
 }

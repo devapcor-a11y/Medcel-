@@ -20,7 +20,7 @@ export async function addCategory(formData: FormData) {
   if (error) return;
 
   revalidatePath('/dashboard/configuracion');
-  revalidatePath('/catalogo');
+  revalidatePath('/productos');
 }
 
 export async function addTag(formData: FormData) {
@@ -41,7 +41,7 @@ export async function addTag(formData: FormData) {
   if (error) return;
 
   revalidatePath('/dashboard/configuracion');
-  revalidatePath('/catalogo');
+  revalidatePath('/productos');
 }
 
 export async function updateStoreSettings(formData: FormData) {

@@ -82,7 +82,7 @@ export default async function ConfiguracionPage() {
                 <Input
                   name="nombre_tienda"
                   id="nombre_tienda"
-                  defaultValue={configMap['nombre_tienda'] || 'DigiBrain'}
+                  defaultValue={configMap['nombre_tienda'] || 'Medcel'}
                 />
               </div>
               <div className="space-y-2">

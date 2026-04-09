@@ -42,6 +42,17 @@ export default function NuevoProductoForm({
   const [categoriaId, setCategoriaId] = useState<string>('none');
   const [estado, setEstado] = useState<string>('disponible');
   const [isDragging, setIsDragging] = useState(false);
+  const [variantes, setVariantes] = useState<{ talle: string; stock: number }[]>([
+    { talle: 'M', stock: 1 },
+  ]);
+
+  const addVariante = () => setVariantes([...variantes, { talle: 'L', stock: 1 }]);
+  const removeVariante = (index: number) => setVariantes(variantes.filter((_, i) => i !== index));
+  const updateVariante = (index: number, field: string, val: string | number) => {
+    const nv = [...variantes];
+    nv[index] = { ...nv[index], [field]: val };
+    setVariantes(nv);
+  };
 
   const toggleTag = (id: string) => {
     if (selectedTags.includes(id)) {
@@ -131,6 +142,12 @@ export default function NuevoProductoForm({
           selectedTags.forEach((id) => formData.append('etiquetas[]', id));
           fotosUrls.forEach((url) => formData.append('fotos[]', url));
 
+          // Append variants to form data
+          variantes.forEach((v) => {
+            formData.append('talles[]', v.talle);
+            formData.append('stocks[]', v.stock.toString());
+          });
+
           // Call the server action and capture possible validation errors
           const response = await createProduct(formData);
           if (response?.error) {
@@ -153,7 +170,7 @@ export default function NuevoProductoForm({
               name="nombre"
               id="nombre"
               required
-              placeholder="Ej: Notebook Lenovo ThinkPad T14"
+              placeholder="Ej: Ambo Clásico Azul Noche"
             />
           </div>
 
@@ -163,8 +180,46 @@ export default function NuevoProductoForm({
               name="descripcion"
               id="descripcion"
               rows={4}
-              placeholder="Detalles de hardware, estado, etc."
+              placeholder="Detalles de la tela, tipo de cuello, bolsillos, etc."
             />
+          </div>
+
+          {/* Variantes (Talles y Cantidades) */}
+          <div className="space-y-4 rounded-md border p-4 bg-muted/10">
+            <div className="flex items-center justify-between">
+              <Label className="text-base font-semibold">Talles y Cantidades en Inventario</Label>
+              <Button type="button" variant="outline" size="sm" onClick={addVariante}>
+                + Agregar Talle
+              </Button>
+            </div>
+            {variantes.map((v, i) => (
+              <div key={i} className="flex items-end gap-4">
+                <div className="flex-1 space-y-2">
+                  <Label>Talle</Label>
+                  <Input 
+                    placeholder="Ej: S, M, L, XL" 
+                    value={v.talle} 
+                    onChange={(e) => updateVariante(i, 'talle', e.target.value)} 
+                    required 
+                  />
+                </div>
+                <div className="flex-1 space-y-2">
+                  <Label>Cantidad (Stock)</Label>
+                  <Input 
+                    type="number" 
+                    min="0" 
+                    value={v.stock} 
+                    onChange={(e) => updateVariante(i, 'stock', parseInt(e.target.value) || 0)} 
+                    required 
+                  />
+                </div>
+                {variantes.length > 1 && (
+                  <Button type="button" variant="ghost" className="text-destructive mb-0.5" onClick={() => removeVariante(i)}>
+                    <X className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            ))}
           </div>
 
           <div className="grid grid-cols-2 gap-4">

@@ -308,7 +308,7 @@ export default async function DashboardPage() {
               </div>
             </div>
             <Button asChild className="mt-6 w-full" variant="secondary">
-              <Link href="/catalogo">Ir al Catálogo Público</Link>
+              <Link href="/productos">Ir al Catálogo Público</Link>
             </Button>
           </CardContent>
         </Card>

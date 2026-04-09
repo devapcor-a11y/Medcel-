@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: ['/dashboard/', '/api/'],
     },
-    sitemap: 'https://digibrain.pyme/sitemap.xml',
+    sitemap: 'https://Medcel.pyme/sitemap.xml',
   };
 }

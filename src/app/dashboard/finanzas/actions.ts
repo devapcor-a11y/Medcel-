@@ -54,7 +54,7 @@ export async function createTransaction(formData: FormData) {
 
   revalidatePath('/dashboard');
   revalidatePath('/dashboard/finanzas');
-  if (producto_id) revalidatePath('/catalogo');
+  if (producto_id) revalidatePath('/productos');
 
   redirect('/dashboard/finanzas');
 }
@@ -103,7 +103,7 @@ export async function deleteTransaction(id: string) {
           .eq('id', t.producto_id);
       }
     }
-    revalidatePath('/catalogo');
+    revalidatePath('/productos');
   }
 
   revalidatePath('/dashboard');
@@ -211,7 +211,7 @@ export async function updateTransaction(formData: FormData) {
   // Reload cache globally
   revalidatePath('/dashboard');
   revalidatePath('/dashboard/finanzas');
-  revalidatePath('/catalogo');
+  revalidatePath('/productos');
 
   redirect('/dashboard/finanzas');
 }

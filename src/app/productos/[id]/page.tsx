@@ -70,7 +70,7 @@ export default async function DetalleProductoPublicoPage({
     configMap[c.clave] = val;
   });
 
-  const nombreTienda = configMap['nombre_tienda'] || 'DigiBrain';
+  const nombreTienda = configMap['nombre_tienda'] || 'Medcel';
   const rawWaConfig = configMap['contacto_whatsapp'] || '5491100000000';
   const rawIgConfig = configMap['contacto_instagram'] || ''; // username e.g. "mi_tienda"
 
@@ -143,18 +143,9 @@ export default async function DetalleProductoPublicoPage({
       <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <Link
-            href="/catalogo"
+            href="/productos"
             className="flex items-center gap-2 text-xl font-bold tracking-tight text-primary transition-opacity hover:opacity-80"
           >
-            <img
-              src="/favicon.ico"
-              alt="Logo"
-              className="h-6 w-6 object-contain"
-              style={{
-                filter:
-                  'brightness(0) saturate(100%) invert(58%) sepia(87%) saturate(3015%) hue-rotate(345deg) brightness(101%) contrast(100%)',
-              }}
-            />
             {nombreTienda}
           </Link>
           <div className="hidden text-xs font-medium text-muted-foreground sm:block">
@@ -166,7 +157,7 @@ export default async function DetalleProductoPublicoPage({
       <main className="container mx-auto flex-1 px-4 py-8">
         {/* Breadcrumb Navigation */}
         <Link
-          href={`/catalogo${product.categorias?.slug ? `?categoria=${product.categorias.slug}` : ''}`}
+          href={`/productos${product.categorias?.slug ? `?categoria=${product.categorias.slug}` : ''}`}
           className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-primary"
         >
           <ArrowLeft className="h-4 w-4" />

@@ -12,11 +12,20 @@ import {
 import { login } from './actions';
 import { AlertCircle } from 'lucide-react';
 
-export default function LoginPage({
+import { createClient } from '@/utils/supabase/server';
+import { redirect } from 'next/navigation';
+
+export default async function LoginPage({
   searchParams,
 }: {
   searchParams: { error?: string };
 }) {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (user) {
+    redirect('/dashboard');
+  }
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <Card className="w-full max-w-sm border-border shadow-sm">
@@ -26,7 +35,7 @@ export default function LoginPage({
               Ingreso Socios
             </CardTitle>
             <CardDescription className="text-center text-muted-foreground">
-              DigiBrain PYME Management
+              Medcel PYME Management
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -42,7 +51,7 @@ export default function LoginPage({
                 id="identifier"
                 name="identifier"
                 type="text"
-                placeholder="juan@digibrain.com o Juan"
+                placeholder="juan@medcel.com o Juan"
                 required
                 className="bg-card"
               />

@@ -53,7 +53,7 @@ export default function Sidebar({ user }: { user: any }) {
                 'brightness(0) saturate(100%) invert(58%) sepia(87%) saturate(3015%) hue-rotate(345deg) brightness(101%) contrast(100%)',
             }}
           />
-          DigiBrain
+          Medcel
         </h2>
         <p className="ml-8 mt-1 truncate text-xs font-medium text-muted-foreground opacity-80">
           {user?.email}
@@ -87,7 +87,7 @@ export default function Sidebar({ user }: { user: any }) {
           className="w-full justify-start bg-card text-muted-foreground"
           asChild
         >
-          <Link href="/catalogo" target="_blank">
+          <Link href="/productos" target="_blank">
             <ExternalLink className="mr-2 h-4 w-4" />
             Ver Catálogo
           </Link>

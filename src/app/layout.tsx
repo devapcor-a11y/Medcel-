@@ -1,46 +1,22 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { Inter, Outfit } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/toaster';
 import { Toaster as SonnerToaster } from '@/components/ui/sonner';
+import { Navbar } from '@/components/Navbar';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
+const outfit = Outfit({ subsets: ['latin'], variable: '--font-outfit' });
 
 export const metadata: Metadata = {
   title: {
-    default: 'DigiBrain - PYME Management',
-    template: '%s | DigiBrain',
+    default: 'Medcel - Ambos y Cofias Personalizados',
+    template: '%s | Medcel',
   },
   description:
-    'Sistema de gestión y catálogo integral para pymes. Manejo de inventario, ventas y finanzas de manera sencilla.',
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
-    },
-  },
-  openGraph: {
-    title: 'DigiBrain - PYME Management',
-    description: 'Sistema de gestión y catálogo integral para pymes.',
-    url: 'https://digibrain.pyme',
-    siteName: 'DigiBrain',
-    images: [
-      {
-        url: '/opengraph-image.png',
-        width: 1200,
-        height: 630,
-        alt: 'DigiBrain Logo',
-      },
-    ],
-    locale: 'es_AR',
-    type: 'website',
-  },
+    'Venta de ambos médicos y cofias con diseños exclusivos y personalizados. Comodidad y estilo para profesionales de la salud.',
+  keywords: 'ambos médicos, cofias, ropa médica, uniformes médicos, diseños personalizados',
 };
 
 export default function RootLayout({
@@ -51,7 +27,7 @@ export default function RootLayout({
   return (
     <html lang="es" suppressHydrationWarning>
       <body
-        className={`${inter.variable} bg-background font-sans text-foreground antialiased`}
+        className={`${inter.variable} ${outfit.variable} bg-background font-sans text-foreground antialiased`}
       >
         <ThemeProvider
           attribute="class"
@@ -59,6 +35,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          <Navbar />
           {children}
           <Toaster />
           <SonnerToaster />

@@ -56,7 +56,7 @@ function ProductCard({
   return (
     <Card className="flex h-full flex-col overflow-hidden border-border/50 transition-shadow duration-200 hover:shadow-md">
       <Link
-        href={`/catalogo/${producto.id}`}
+        href={`/productos/${producto.id}`}
         className="relative block focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
       >
         <div className="relative flex aspect-square w-full items-center justify-center overflow-hidden bg-muted/30">
@@ -91,7 +91,7 @@ function ProductCard({
 
       <CardContent className="flex w-full min-w-0 flex-1 flex-col p-4">
         <Link
-          href={`/catalogo/${producto.id}`}
+          href={`/productos/${producto.id}`}
           className="group block focus:outline-none"
         >
           <div className="mb-1 line-clamp-1 break-words text-xs font-medium text-primary group-hover:underline">
@@ -151,7 +151,7 @@ export default async function CatalogoPage({
     configMap[c.clave] = val;
   });
 
-  const nombreTienda = configMap['nombre_tienda'] || 'DigiBrain';
+  const nombreTienda = configMap['nombre_tienda'] || 'Medcel';
 
   // Build query
   let supabaseQuery = supabase
@@ -228,19 +228,9 @@ export default async function CatalogoPage({
       <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <Link
-            href="/catalogo"
+            href="/productos"
             className="flex items-center gap-2 text-xl font-bold tracking-tight text-primary transition-opacity hover:opacity-80"
           >
-            {/* Filtro CSS para convertir cualquier ícono oscuro/negro a un color Naranja/Primario de la marca */}
-            <img
-              src="/favicon.ico"
-              alt="Logo"
-              className="h-6 w-6 object-contain"
-              style={{
-                filter:
-                  'brightness(0) saturate(100%) invert(58%) sepia(87%) saturate(3015%) hue-rotate(345deg) brightness(101%) contrast(100%)',
-              }}
-            />
             {nombreTienda}
           </Link>
           <div className="hidden text-xs font-medium text-muted-foreground sm:block">
@@ -259,7 +249,7 @@ export default async function CatalogoPage({
             <ul className="scrollbar-none flex flex-row gap-2 overflow-x-auto pb-2 md:max-h-[60vh] md:flex-col md:space-y-1.5 md:overflow-y-auto md:pr-2">
               <li className="flex-shrink-0">
                 <Link
-                  href="/catalogo"
+                  href="/productos"
                   className={`block rounded-md px-4 py-2 text-sm transition-colors md:px-3 md:py-1.5 ${!searchParams.categoria ? 'bg-primary/10 font-medium text-primary' : 'bg-muted/50 text-muted-foreground hover:bg-muted'}`}
                 >
                   Todas
@@ -268,7 +258,7 @@ export default async function CatalogoPage({
               {categorias?.map((cat) => (
                 <li key={cat.id} className="flex-shrink-0">
                   <Link
-                    href={`/catalogo?categoria=${cat.slug}`}
+                    href={`/productos?categoria=${cat.slug}`}
                     className={`block rounded-md px-4 py-2 text-sm transition-colors md:px-3 md:py-1.5 ${searchParams.categoria === cat.slug ? 'bg-primary/10 font-medium text-primary' : 'bg-muted/50 text-muted-foreground hover:bg-muted'}`}
                   >
                     {cat.nombre}
