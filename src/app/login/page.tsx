@@ -51,7 +51,7 @@ export default async function LoginPage({
                 id="identifier"
                 name="identifier"
                 type="text"
-                placeholder="juan@medcel.com o Juan"
+                placeholder="Email o usuario"
                 required
                 className="bg-card"
               />
