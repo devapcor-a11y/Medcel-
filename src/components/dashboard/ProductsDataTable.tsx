@@ -219,6 +219,18 @@ export function ProductsDataTable({
       },
     },
     {
+      accessorKey: 'sexo',
+      header: 'Sexo',
+      cell: ({ row }) => {
+        const sexo = row.getValue('sexo') as string;
+        return (
+          <Badge variant="outline" className="capitalize">
+            {sexo}
+          </Badge>
+        );
+      },
+    },
+    {
       accessorKey: 'stock',
       header: 'Stock / Talles',
       cell: ({ row }) => {

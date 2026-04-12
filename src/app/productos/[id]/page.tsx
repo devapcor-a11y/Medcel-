@@ -178,8 +178,10 @@ export default async function DetalleProductoPublicoPage({
 
           {/* Product Info area */}
           <div className="flex w-full min-w-0 flex-col">
-            <div className="mb-2 text-sm font-semibold uppercase tracking-wider text-primary">
-              {product.categorias?.nombre || 'Sin categoría'}
+            <div className="mb-2 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-primary">
+              <span>{product.categorias?.nombre || 'Sin categoría'}</span>
+              <span className="text-muted-foreground/40">•</span>
+              <span className="text-muted-foreground/80 lowercase">{product.sexo}</span>
             </div>
             <h1 className="mb-6 break-words text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
               {product.nombre}

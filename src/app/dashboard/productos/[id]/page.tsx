@@ -193,8 +193,13 @@ export default async function ProductoDetallePage({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-xl font-medium">
-              {product.categorias?.nombre || '-'}
+            <div className="flex flex-col gap-1">
+              <div className="text-xl font-medium">
+                {product.categorias?.nombre || '-'}
+              </div>
+              <div className="text-xs text-muted-foreground capitalize">
+                Destinado: {product.sexo}
+              </div>
             </div>
           </CardContent>
         </Card>
