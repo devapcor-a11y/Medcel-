@@ -110,9 +110,11 @@ export async function updateProduct(formData: FormData) {
     : null;
   const estado = formData.get('estado') as string;
 
-  // Extract photo URLs and tags
+  // Extract photo URLs and tags and variants
   const etiquetas = formData.getAll('etiquetas[]') as string[];
   const fotosUrls = formData.getAll('fotos[]') as string[];
+  const talles = formData.getAll('talles[]') as string[];
+  const stocks = formData.getAll('stocks[]') as string[];
 
   if (!id || !nombre || (!precio_ars && !precio_usd)) {
     return { error: 'Nombre y al menos un precio son requeridos.' };
@@ -125,6 +127,7 @@ export async function updateProduct(formData: FormData) {
     precio_ars,
     precio_usd,
     estado,
+    stock: stocks.reduce((acc, current) => acc + parseInt(current || '0', 10), 0),
   };
 
   // 1. Update product
@@ -156,6 +159,17 @@ export async function updateProduct(formData: FormData) {
       orden: i,
     }));
     await supabase.from('producto_fotos').insert(pFotos);
+  }
+
+  // 4. Update variants (delete old, insert new)
+  await supabase.from('producto_variantes').delete().eq('producto_id', id);
+  if (talles.length > 0) {
+    const pVariantes = talles.map((talle, i) => ({
+      producto_id: id,
+      talle: talle || 'Único',
+      stock: parseInt(stocks[i] || '0', 10)
+    }));
+    await supabase.from('producto_variantes').insert(pVariantes);
   }
 
   revalidatePath('/dashboard/productos');

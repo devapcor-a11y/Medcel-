@@ -18,7 +18,8 @@ export default async function EditarProductoPage({
       `
       *,
       productos_etiquetas(etiqueta_id),
-      producto_fotos(url, orden)
+      producto_fotos(url, orden),
+      producto_variantes(id, talle, stock, color)
     `
     )
     .eq('id', params.id)

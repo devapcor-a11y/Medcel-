@@ -46,8 +46,17 @@ export default function EditarProductoForm({
       ?.sort((a: any, b: any) => a.orden - b.orden)
       .map((f: any) => f.url) || [];
 
+  const initialVariantes = producto.producto_variantes?.length 
+    ? producto.producto_variantes.map((v: any) => ({
+        id: v.id,
+        talle: v.talle,
+        stock: v.stock,
+      }))
+    : [{ talle: 'M', stock: 1 }];
+
   const [selectedTags, setSelectedTags] = useState<string[]>(initialTags);
   const [fotosUrls, setFotosUrls] = useState<string[]>(initialFotos);
+  const [variantes, setVariantes] = useState<{ id?: string; talle: string; stock: number }[]>(initialVariantes);
   const [uploading, setUploading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [categoriaId, setCategoriaId] = useState<string>(
@@ -62,6 +71,14 @@ export default function EditarProductoForm({
     } else {
       setSelectedTags([...selectedTags, id]);
     }
+  };
+
+  const addVariante = () => setVariantes([...variantes, { talle: 'L', stock: 1 }]);
+  const removeVariante = (index: number) => setVariantes(variantes.filter((_, i) => i !== index));
+  const updateVariante = (index: number, field: string, val: string | number) => {
+    const nv = [...variantes];
+    nv[index] = { ...nv[index], [field]: val };
+    setVariantes(nv);
   };
 
   const processFiles = async (files: File[]) => {
@@ -145,6 +162,12 @@ export default function EditarProductoForm({
           selectedTags.forEach((id) => formData.append('etiquetas[]', id));
           fotosUrls.forEach((url) => formData.append('fotos[]', url));
 
+          // Append variants to form data
+          variantes.forEach((v) => {
+            formData.append('talles[]', v.talle);
+            formData.append('stocks[]', v.stock.toString());
+          });
+
           // Call the server action and capture possible validation errors
           const response = await updateProduct(formData);
           if (response?.error) {
@@ -181,6 +204,43 @@ export default function EditarProductoForm({
               defaultValue={producto.descripcion || ''}
               placeholder="Detalles de hardware, estado, etc."
             />
+          </div>
+
+          <div className="space-y-4 rounded-md border p-4 bg-muted/10">
+            <div className="flex items-center justify-between">
+              <Label className="text-base font-semibold">Talles y Cantidades en Inventario</Label>
+              <Button type="button" variant="outline" size="sm" onClick={addVariante}>
+                + Agregar Talle
+              </Button>
+            </div>
+            {variantes.map((v, i) => (
+              <div key={i} className="flex items-end gap-4">
+                <div className="flex-1 space-y-2">
+                  <Label>Talle</Label>
+                  <Input 
+                    placeholder="Ej: S, M, L, XL" 
+                    value={v.talle} 
+                    onChange={(e) => updateVariante(i, 'talle', e.target.value)} 
+                    required 
+                  />
+                </div>
+                <div className="flex-1 space-y-2">
+                  <Label>Cantidad (Stock)</Label>
+                  <Input 
+                    type="number" 
+                    min="0" 
+                    value={v.stock} 
+                    onChange={(e) => updateVariante(i, 'stock', parseInt(e.target.value) || 0)} 
+                    required 
+                  />
+                </div>
+                {variantes.length > 1 && (
+                  <Button type="button" variant="ghost" className="text-destructive mb-0.5" onClick={() => removeVariante(i)}>
+                    <X className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            ))}
           </div>
 
           <div className="grid grid-cols-2 gap-4">

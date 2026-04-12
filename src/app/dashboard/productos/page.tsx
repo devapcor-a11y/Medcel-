@@ -23,7 +23,8 @@ export default async function ProductosMasterPage() {
       *,
       categorias(nombre),
       producto_fotos(url),
-      transacciones(id)
+      transacciones(id),
+      producto_variantes(id, talle, stock)
     `
     )
     .order('fecha_carga', { ascending: false });

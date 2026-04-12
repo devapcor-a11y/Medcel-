@@ -32,7 +32,7 @@ export default async function ProductoDetallePage({
 
   const { data: product } = await supabase
     .from('productos')
-    .select('*, categorias(nombre)')
+    .select('*, categorias(nombre), producto_variantes(talle, stock)')
     .eq('id', params.id)
     .single();
 
@@ -166,9 +166,23 @@ export default async function ProductoDetallePage({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center gap-2">
-              <span className="text-2xl font-bold">{product.stock} un.</span>
-              <Badge variant="outline">{product.estado}</Badge>
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-xl font-bold">Total: {product.stock} un.</span>
+                <Badge variant="outline">{product.estado}</Badge>
+              </div>
+              
+              {product.producto_variantes && product.producto_variantes.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                   {product.producto_variantes.map((v: any, i: number) => (
+                     <Badge key={i} variant={v.stock > 0 ? 'secondary' : 'destructive'} className="font-mono">
+                        Talle {v.talle}: {v.stock}
+                     </Badge>
+                   ))}
+                </div>
+              ) : (
+                <div className="text-sm text-muted-foreground">Sin detalle de talles.</div>
+              )}
             </div>
           </CardContent>
         </Card>

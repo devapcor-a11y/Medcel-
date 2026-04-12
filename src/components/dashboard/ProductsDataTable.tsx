@@ -220,10 +220,28 @@ export function ProductsDataTable({
     },
     {
       accessorKey: 'stock',
-      header: 'Stock',
-      cell: ({ row }) => (
-        <div className="text-center font-bold">{row.getValue('stock')}</div>
-      ),
+      header: 'Stock / Talles',
+      cell: ({ row }) => {
+        const prod = row.original;
+        const variantes = prod.producto_variantes || [];
+        
+        if (variantes.length === 0) {
+           return <div className="text-center font-bold">{prod.stock}</div>;
+        }
+
+        return (
+          <div className="flex flex-col gap-1 items-center justify-center">
+             <div className="text-xs font-bold w-full text-center border-b border-border/50 pb-1 mb-1">Total: {prod.stock}</div>
+             <div className="flex flex-wrap gap-1 justify-center max-w-[120px]">
+               {variantes.map((v: any) => (
+                 <Badge key={v.id} variant={v.stock > 0 ? 'secondary' : 'outline'} className="text-[10px] px-1 py-0 h-4">
+                   {v.talle}: {v.stock}
+                 </Badge>
+               ))}
+             </div>
+          </div>
+        );
+      },
     },
     {
       id: 'precioArs',

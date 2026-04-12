@@ -89,6 +89,7 @@ export default async function DetalleProductoPublicoPage({
       *,
       categorias ( id, nombre, slug ),
       producto_fotos ( id, url, orden ),
+      producto_variantes ( id, talle, stock ),
       productos_etiquetas (
         etiquetas ( id, nombre, slug, color )
       )
@@ -192,6 +193,23 @@ export default async function DetalleProductoPublicoPage({
                 o {formatUsd(precioUsd)}
               </div>
             </div>
+
+            {product.producto_variantes && product.producto_variantes.length > 0 && (
+              <div className="mb-6">
+                 <h3 className="mb-3 font-semibold text-foreground">Talles disponibles</h3>
+                 <div className="flex flex-wrap gap-2">
+                    {product.producto_variantes.map((v: any) => (
+                      <Badge 
+                        key={v.id} 
+                        variant={v.stock > 0 ? "outline" : "secondary"}
+                        className={`text-sm py-1.5 px-3 border-border ${v.stock <= 0 ? 'opacity-50 line-through' : 'font-medium'}`}
+                      >
+                        {v.talle}
+                      </Badge>
+                    ))}
+                 </div>
+              </div>
+            )}
 
             <div className="prose prose-sm md:prose-base dark:prose-invert mb-10 text-muted-foreground">
               <h3 className="mb-2 font-semibold text-foreground">
