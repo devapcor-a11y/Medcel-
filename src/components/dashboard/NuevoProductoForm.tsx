@@ -21,6 +21,7 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { ArrowLeft, UploadCloud, X } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
 import { createClient } from '@/utils/supabase/client';
 import { v4 as uuidv4 } from 'uuid';
 import { useRouter } from 'next/navigation';
@@ -42,6 +43,7 @@ export default function NuevoProductoForm({
   const [categoriaId, setCategoriaId] = useState<string>('none');
   const [estado, setEstado] = useState<string>('disponible');
   const [sexo, setSexo] = useState<string>('unisex');
+  const [destacado, setDestacado] = useState<boolean>(false);
   const [isDragging, setIsDragging] = useState(false);
   const [variantes, setVariantes] = useState<{ talle: string; stock: number }[]>([
     { talle: 'M', stock: 1 },
@@ -272,6 +274,25 @@ export default function NuevoProductoForm({
                   </SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 gap-4 bg-muted/20 p-4 rounded-lg border border-primary/10">
+            <div className="flex flex-row items-center justify-between">
+              <div className="space-y-0.5 mt-1">
+                <Label htmlFor="destacado" className="text-base font-semibold">Producto Destacado</Label>
+                <p className="text-sm text-muted-foreground pt-1">
+                  Mostrar este producto en la página principal, dentro de la sección &apos;Destacados de la Temporada&apos;.
+                </p>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Switch 
+                   id="destacado"
+                   checked={destacado} 
+                   onCheckedChange={setDestacado} 
+                />
+                <input type="hidden" name="destacado" value={destacado ? 'true' : 'false'} />
+              </div>
             </div>
           </div>
 

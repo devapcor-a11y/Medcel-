@@ -24,6 +24,7 @@ export async function createProduct(formData: FormData) {
     : null;
   const estado = formData.get('estado') as string;
   const sexo = (formData.get('sexo') as string) || 'unisex';
+  const destacado = formData.get('destacado') === 'on' || formData.get('destacado') === 'true';
 
   // Extract photo URLs and tags (these need to be processed on client first and passed as strings)
   const etiquetas = formData.getAll('etiquetas[]') as string[];
@@ -44,6 +45,7 @@ export async function createProduct(formData: FormData) {
     precio_usd,
     estado,
     sexo,
+    destacado,
     stock: stocks.reduce((acc, current) => acc + parseInt(current || '0', 10), 0),
     created_by: user.id,
   };
@@ -112,6 +114,7 @@ export async function updateProduct(formData: FormData) {
     : null;
   const estado = formData.get('estado') as string;
   const sexo = (formData.get('sexo') as string) || 'unisex';
+  const destacado = formData.get('destacado') === 'on' || formData.get('destacado') === 'true';
 
   // Extract photo URLs and tags and variants
   const etiquetas = formData.getAll('etiquetas[]') as string[];
@@ -131,6 +134,7 @@ export async function updateProduct(formData: FormData) {
     precio_usd,
     estado,
     sexo,
+    destacado,
     stock: stocks.reduce((acc, current) => acc + parseInt(current || '0', 10), 0),
   };
 
