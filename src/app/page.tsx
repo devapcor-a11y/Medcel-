@@ -67,8 +67,14 @@ export default async function Home() {
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <Link href="/productos?categoria=ambos" className="group relative overflow-hidden rounded-3xl h-[400px]">
-              <div className="absolute inset-0 bg-primary/20 group-hover:bg-primary/30 transition-colors" />
-              <div className="absolute inset-x-0 bottom-0 p-8 bg-gradient-to-t from-black/60 to-transparent text-white">
+              <Image 
+                src="https://ednfywcgvrolnqulwwco.supabase.co/storage/v1/object/public/public_assets/productos/AmbosMedicosHeroPagina.png" 
+                alt="Ambos Médicos" 
+                fill 
+                className="object-cover transition-transform duration-700 group-hover:scale-110"
+              />
+              <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors" />
+              <div className="absolute inset-x-0 bottom-0 p-8 bg-gradient-to-t from-black/80 via-black/40 to-transparent text-white">
                 <Badge className="mb-4 bg-accent text-accent-foreground border-none">Lo más buscado</Badge>
                 <h3 className="text-3xl font-bold">Ambos Médicos</h3>
                 <p className="mt-2 text-white/80">Confort y elegancia en cada turno.</p>
@@ -76,8 +82,14 @@ export default async function Home() {
             </Link>
             
             <Link href="/productos?categoria=cofias" className="group relative overflow-hidden rounded-3xl h-[400px]">
-              <div className="absolute inset-0 bg-secondary group-hover:bg-secondary/80 transition-colors" />
-              <div className="absolute inset-x-0 bottom-0 p-8 bg-gradient-to-t from-black/60 to-transparent text-white">
+              <Image 
+                src="https://ednfywcgvrolnqulwwco.supabase.co/storage/v1/object/public/public_assets/productos/medcel_ambos34.png" 
+                alt="Cofias con Diseño" 
+                fill 
+                className="object-cover transition-transform duration-700 group-hover:scale-110"
+              />
+              <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors" />
+              <div className="absolute inset-x-0 bottom-0 p-8 bg-gradient-to-t from-black/80 via-black/40 to-transparent text-white">
                 <Badge className="mb-4 bg-primary text-primary-foreground border-none">Personalizables</Badge>
                 <h3 className="text-3xl font-bold">Cofias con Diseño</h3>
                 <p className="mt-2 text-white/80">Dale color a tu uniforme de trabajo.</p>

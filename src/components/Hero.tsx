@@ -10,7 +10,7 @@ export function Hero() {
       {/* Background patterns */}
       <div className="absolute inset-0 -z-10 bg-[radial-gradient(45%_45%_at_50%_50%,var(--secondary)_0%,transparent_100%)] opacity-20" />
       <div className="absolute top-0 right-0 -z-10 h-[500px] w-[500px] translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/5 blur-3xl" />
-      
+
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
           <div className="flex flex-col space-y-8">
@@ -18,15 +18,15 @@ export function Hero() {
               <Sparkles className="mr-2 h-4 w-4" />
               <span>Diseños que inspiran confianza</span>
             </div>
-            
+
             <h1 className="text-5xl font-extrabold tracking-tight text-foreground sm:text-6xl xl:text-7xl">
               Tu esencia en cada <span className="text-primary italic">detalle médico</span>.
             </h1>
-            
+
             <p className="max-w-xl text-lg text-muted-foreground sm:text-xl">
               Ambos y cofias de alta calidad con diseños personalizados que reflejan tu profesionalismo y personalidad. Comodidad que te acompaña en cada guardia.
             </p>
-            
+
             <div className="flex flex-wrap gap-4 pt-4">
               <Button asChild size="lg" className="h-12 rounded-full px-8 text-base shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95">
                 <Link href="/productos">
@@ -39,10 +39,10 @@ export function Hero() {
                 </Link>
               </Button>
             </div>
-            
+
             <div className="flex items-center gap-8 pt-4">
               <div className="flex flex-col">
-                <span className="text-2xl font-bold text-foreground">500+</span>
+                <span className="text-2xl font-bold text-foreground">50+</span>
                 <span className="text-sm text-muted-foreground">Diseños Únicos</span>
               </div>
               <div className="h-10 w-px bg-border" />
@@ -52,7 +52,7 @@ export function Hero() {
               </div>
             </div>
           </div>
-          
+
           <div className="relative aspect-square lg:aspect-auto lg:h-[600px]">
             <div className="absolute inset-0 rounded-3xl bg-gradient-to-tr from-primary/20 via-secondary/40 to-accent/20 blur-2xl" />
             <div className="relative h-full overflow-hidden rounded-3xl border bg-card/50 backdrop-blur-sm">
@@ -74,7 +74,7 @@ export function Hero() {
                 </div>
               </div>
             </div>
-            
+
             {/* Floating elements */}
             <div className="absolute -bottom-6 -left-6 rounded-2xl border bg-background p-4 shadow-xl animate-bounce-slow">
               <div className="flex items-center gap-3">
