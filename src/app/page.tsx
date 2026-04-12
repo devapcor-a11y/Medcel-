@@ -2,10 +2,29 @@ import { Hero } from '@/components/Hero';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Heart, ShieldCheck, Truck, Palette } from 'lucide-react';
+import { Heart, ShieldCheck, Truck, Palette, ImageOff } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
+import { createClient } from '@/utils/supabase/server';
+import { fetchExchangeRate, formatArs } from '@/utils/currency';
 
-export default function Home() {
+export default async function Home() {
+  const supabase = createClient();
+  const exchangeRate = await fetchExchangeRate('blue');
+
+  const { data: destacados } = await supabase
+    .from('productos')
+    .select(`
+       *,
+       categorias ( nombre ),
+       producto_fotos ( url )
+    `)
+    .eq('estado', 'disponible')
+    .eq('destacado', true)
+    .order('fecha_carga', { ascending: false })
+    .limit(4);
+
+  const finalDestacados = destacados || [];
   return (
     <main className="flex min-h-screen flex-col">
       <Hero />
@@ -76,36 +95,33 @@ export default function Home() {
               <h2 className="text-3xl font-extrabold sm:text-4xl text-foreground">Destacados de la Temporada</h2>
               <p className="mt-4 text-lg text-muted-foreground">Calidad que se siente, diseño que se nota.</p>
             </div>
-            <Button variant="outline" className="rounded-full border-2">Ver todos los productos</Button>
+            <Button variant="outline" className="rounded-full border-2" asChild>
+               <Link href="/productos">Ver todos los productos</Link>
+            </Button>
           </div>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            <ProductCard 
-              name="Ambo Essential Teal"
-              category="Ambos"
-              price="$45.000"
-              color="bg-primary"
-              label="Bestseller"
-            />
-            <ProductCard 
-              name="Cofia Floral Soft Pink"
-              category="Cofias"
-              price="$8.500"
-              color="bg-secondary"
-            />
-            <ProductCard 
-              name="Ambo Night Blue"
-              category="Ambos"
-              price="$48.000"
-              color="bg-slate-800"
-              label="Nuevo"
-            />
-            <ProductCard 
-              name="Cofia Honey Yellow"
-              category="Cofias"
-              price="$8.500"
-              color="bg-accent"
-            />
+            {finalDestacados.length > 0 ? (
+              finalDestacados.map((prod: any) => {
+                 const thumb = prod.producto_fotos?.[0]?.url;
+                 const finalPrice = formatArs(prod.precio_ars || (prod.precio_usd || 0) * exchangeRate.venta);
+                 return (
+                   <ProductCard 
+                     key={prod.id}
+                     id={prod.id}
+                     name={prod.nombre}
+                     category={prod.categorias?.nombre || 'General'}
+                     price={finalPrice}
+                     imageUrl={thumb}
+                     label={prod.destacado ? "Destacado" : undefined}
+                   />
+                 )
+              })
+            ) : (
+               <div className="col-span-1 sm:col-span-2 lg:col-span-4 text-center text-muted-foreground py-12 border rounded-xl bg-muted/10">
+                 No hay productos destacados por el momento.
+               </div>
+            )}
           </div>
         </div>
       </section>
@@ -155,30 +171,34 @@ function FeatureCard({ icon, title, description }: { icon: React.ReactNode, titl
   );
 }
 
-function ProductCard({ name, category, price, color, label }: { name: string, category: string, price: string, color: string, label?: string }) {
+function ProductCard({ id, name, category, price, imageUrl, label }: { id: string, name: string, category: string, price: string, imageUrl?: string, label?: string }) {
   return (
-    <div className="group space-y-4">
-      <div className={`relative aspect-[3/4] overflow-hidden rounded-3xl ${color} flex items-center justify-center`}>
+    <Link href={`/productos/${id}`} className="group space-y-4 cursor-pointer block rounded-3xl outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+      <div className={`relative aspect-[3/4] overflow-hidden rounded-3xl bg-muted/30 flex items-center justify-center border border-border/50`}>
+        {imageUrl ? (
+           <Image src={imageUrl} alt={name} fill sizes="(max-width: 768px) 50vw, 25vw" className="object-cover transition-transform duration-500 group-hover:scale-105" />
+        ) : (
+           <ImageOff className="h-10 w-10 text-muted-foreground/30" />
+        )}
+        
         {label && (
-          <Badge className="absolute top-4 left-4 bg-white text-black hover:bg-white/90 border-none shadow-sm">
+          <Badge className="absolute top-4 left-4 bg-white text-black hover:bg-white/90 border-none shadow-sm z-10 font-semibold">
             {label}
           </Badge>
         )}
-        <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute inset-0 bg-black/10 flex items-center justify-center">
-          <Button variant="secondary" className="rounded-full shadow-lg">Ver Detalles</Button>
+        <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute inset-0 bg-black/20 flex items-center justify-center z-10 backdrop-blur-[2px]">
+          <Button variant="secondary" className="rounded-full shadow-lg font-bold pointer-events-none">Ver Detalles</Button>
         </div>
-        {/* Placeholder for product shadow/depth */}
-        <div className="w-1/2 h-2/3 bg-white/10 rounded-2xl border border-white/20 blur-sm transform group-hover:scale-110 transition-transform" />
       </div>
       <div>
-        <div className="flex justify-between items-start">
-          <div>
-            <p className="text-sm text-muted-foreground font-medium">{category}</p>
-            <h3 className="text-lg font-bold group-hover:text-primary transition-colors">{name}</h3>
+        <div className="flex justify-between items-start gap-4">
+          <div className="min-w-0">
+            <p className="text-sm text-primary font-semibold mb-1 uppercase tracking-wider">{category}</p>
+            <h3 className="text-lg font-bold group-hover:text-primary transition-colors line-clamp-2">{name}</h3>
           </div>
-          <p className="font-bold text-lg">{price}</p>
+          <p className="font-extrabold text-lg text-foreground whitespace-nowrap">{price}</p>
         </div>
       </div>
-    </div>
+    </Link>
   );
 }

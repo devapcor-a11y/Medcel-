@@ -6,6 +6,7 @@ CREATE TYPE estado_producto AS ENUM ('disponible', 'vendido', 'reservado', 'borr
 CREATE TYPE estado_orden AS ENUM ('pendiente', 'pagada', 'enviada', 'entregada', 'cancelada');
 CREATE TYPE tipo_transaccion AS ENUM ('venta', 'compra', 'gasto', 'transferencia');
 CREATE TYPE moneda_tipo AS ENUM ('ARS', 'USD');
+CREATE TYPE sexo_producto AS ENUM ('femenino', 'masculino', 'unisex');
 
 -- 2. TABLAS
 
@@ -58,6 +59,7 @@ CREATE TABLE IF NOT EXISTS productos (
     precio_ars NUMERIC,       -- Legacy Dashboard
     precio_usd NUMERIC,       -- Legacy Dashboard
     stock INTEGER DEFAULT 1,  -- Legacy Stock control
+    sexo sexo_producto DEFAULT 'unisex', -- NEW
     estado estado_producto DEFAULT 'disponible',
     destacado BOOLEAN DEFAULT false,
     fecha_carga TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,

@@ -63,6 +63,7 @@ export default function EditarProductoForm({
     producto.categoria_id || 'none'
   );
   const [estado, setEstado] = useState<string>(producto.estado || 'disponible');
+  const [sexo, setSexo] = useState<string>(producto.sexo || 'unisex');
   const [isDragging, setIsDragging] = useState(false);
 
   const toggleTag = (id: string) => {
@@ -243,7 +244,7 @@ export default function EditarProductoForm({
             ))}
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="categoria_id">Categoría</Label>
               <input type="hidden" name="categoria_id" value={categoriaId} />
@@ -261,15 +262,31 @@ export default function EditarProductoForm({
                 </SelectContent>
               </Select>
             </div>
+            
             <div className="space-y-2">
-              <Label htmlFor="estado">Estado</Label>
+              <Label htmlFor="sexo">Sexo Destinado</Label>
+              <input type="hidden" name="sexo" value={sexo} />
+              <Select value={sexo} onValueChange={setSexo}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar sexo" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="unisex">Unisex</SelectItem>
+                  <SelectItem value="femenino">Femenino</SelectItem>
+                  <SelectItem value="masculino">Masculino</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="estado">Estado Web</Label>
               <input type="hidden" name="estado" value={estado} />
               <Select value={estado} onValueChange={setEstado}>
                 <SelectTrigger>
                   <SelectValue placeholder="Estado actual" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="disponible">Disponible (Web)</SelectItem>
+                  <SelectItem value="disponible">Disponible</SelectItem>
                   <SelectItem value="vendido">Vendido</SelectItem>
                   <SelectItem value="reservado">
                     Oculto / En Pausa (Forzar Baja Web)
