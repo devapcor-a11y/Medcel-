@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: ['/dashboard/', '/api/'],
     },
-    sitemap: 'https://Medcel.pyme/sitemap.xml',
+    sitemap: 'https://medcel.vercel.app/sitemap.xml',
   };
 }
