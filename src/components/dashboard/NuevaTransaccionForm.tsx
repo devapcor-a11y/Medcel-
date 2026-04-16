@@ -1,6 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useTransition, useEffect } from 'react';
+import { useFormState } from 'react-dom';
+import { toast } from 'sonner';
 import {
   CardContent,
   CardDescription,
@@ -35,9 +37,22 @@ export default function NuevaTransaccionForm({
   etiquetas: any[];
 }) {
   const [tipoMovimiento, setTipoMovimiento] = useState('venta');
+  const [state, formAction] = useFormState(createTransaction, null);
+  const [isPending, setIsPending] = useState(false);
+
+  useEffect(() => {
+    if (state?.error) {
+      toast.error(state.error);
+      setIsPending(false);
+    }
+  }, [state]);
+
+  const handleSubmit = () => {
+    setIsPending(true);
+  };
 
   return (
-    <form action={createTransaction}>
+    <form action={formAction} onSubmit={handleSubmit}>
       <CardHeader>
         <CardTitle>Detalles del Movimiento</CardTitle>
         <CardDescription>
@@ -180,8 +195,8 @@ export default function NuevaTransaccionForm({
           />
         </div>
 
-        <Button type="submit" className="mt-6 w-full">
-          Confirmar Transacción
+        <Button type="submit" className="mt-6 w-full" disabled={isPending}>
+          {isPending ? 'Procesando...' : 'Confirmar Transacción'}
         </Button>
       </CardContent>
     </form>

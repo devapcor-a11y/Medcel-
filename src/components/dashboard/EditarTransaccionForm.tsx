@@ -1,6 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useFormState } from 'react-dom';
+import { toast } from 'sonner';
 import {
   CardContent,
   CardDescription,
@@ -31,9 +33,22 @@ export default function EditarTransaccionForm({
   transaccion: any;
 }) {
   const [tipoMovimiento, setTipoMovimiento] = useState(transaccion.tipo);
+  const [state, formAction] = useFormState(updateTransaction, null);
+  const [isPending, setIsPending] = useState(false);
+
+  useEffect(() => {
+    if (state?.error) {
+      toast.error(state.error);
+      setIsPending(false);
+    }
+  }, [state]);
+
+  const handleSubmit = () => {
+    setIsPending(true);
+  };
 
   return (
-    <form action={updateTransaction}>
+    <form action={formAction} onSubmit={handleSubmit}>
       <input type="hidden" name="transaction_id" value={transaccion.id} />
 
       <CardHeader>
@@ -191,8 +206,8 @@ export default function EditarTransaccionForm({
           />
         </div>
 
-        <Button type="submit" className="mt-6 w-full">
-          Guardar Cambios
+        <Button type="submit" className="mt-6 w-full" disabled={isPending}>
+          {isPending ? 'Guardando...' : 'Guardar Cambios'}
         </Button>
       </CardContent>
     </form>

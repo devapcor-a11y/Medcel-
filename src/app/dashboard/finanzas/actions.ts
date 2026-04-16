@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { fetchExchangeRate, getActiveExchangeRate } from '@/utils/currency';
 
-export async function createTransaction(formData: FormData) {
+export async function createTransaction(prevState: any, formData: FormData) {
   const supabase = createClient();
 
   const {
@@ -14,7 +14,8 @@ export async function createTransaction(formData: FormData) {
   if (!user) return redirect('/login');
 
   const tipo = formData.get('tipo') as string;
-  const monto = parseFloat(formData.get('monto') as string);
+  const montoRaw = formData.get('monto') as string;
+  const monto = parseFloat(montoRaw);
   const moneda = formData.get('moneda') as string;
   const centro_de_costos_id = formData.get('centro_de_costos_id') as string;
   const descripcion = formData.get('descripcion') as string;
@@ -25,12 +26,19 @@ export async function createTransaction(formData: FormData) {
   const centro_destino_id =
     !destinoIdRaw || destinoIdRaw === 'none' ? null : destinoIdRaw;
 
-  if (!tipo || !monto || !moneda || !centro_de_costos_id) {
-    console.error('Faltan campos requeridos');
-    return;
+  if (!tipo || isNaN(monto) || !moneda || !centro_de_costos_id) {
+    return { error: 'Faltan campos requeridos o el monto no es válido' };
   }
 
   const ignorar_balance = formData.get('ignorar_balance') === 'on';
+
+  let cotizacion = 1050; // default fallback
+  try {
+    const rate = await getActiveExchangeRate(supabase);
+    cotizacion = rate.venta;
+  } catch (e) {
+    console.error('Error fetching exchange rate:', e);
+  }
 
   const payload = {
     tipo,
@@ -41,15 +49,15 @@ export async function createTransaction(formData: FormData) {
     descripcion,
     producto_id,
     ignorar_balance: tipo === 'gasto' ? ignorar_balance : false,
-    cotizacion_usd: (await getActiveExchangeRate(supabase)).venta,
+    cotizacion_usd: cotizacion,
     registrada_por: user.id,
   };
 
   const { error } = await supabase.from('transacciones').insert([payload]);
 
   if (error) {
-    console.error(error.message);
-    return;
+    console.error('Database Error:', error.message);
+    return { error: `Error en base de datos: ${error.message}` };
   }
 
   revalidatePath('/dashboard');
@@ -111,7 +119,7 @@ export async function deleteTransaction(id: string) {
   return { success: true };
 }
 
-export async function updateTransaction(formData: FormData) {
+export async function updateTransaction(prevState: any, formData: FormData) {
   const supabase = createClient();
   const {
     data: { user },
@@ -120,7 +128,8 @@ export async function updateTransaction(formData: FormData) {
 
   const id = formData.get('transaction_id') as string;
   const tipo = formData.get('tipo') as string;
-  const monto = parseFloat(formData.get('monto') as string);
+  const montoRaw = formData.get('monto') as string;
+  const monto = parseFloat(montoRaw);
   const moneda = formData.get('moneda') as string;
   const centro_de_costos_id = formData.get('centro_de_costos_id') as string;
   const descripcion = formData.get('descripcion') as string;
@@ -133,9 +142,8 @@ export async function updateTransaction(formData: FormData) {
         : destinoIdRaw
       : null;
 
-  if (!id || !tipo || !monto || !moneda || !centro_de_costos_id) {
-    console.error('Faltan campos requeridos en actualización');
-    return;
+  if (!id || !tipo || isNaN(monto) || !moneda || !centro_de_costos_id) {
+    return { error: 'Faltan campos requeridos o el monto no es válido' };
   }
 
   // Recupera la transacción original para comparar cambios que afecten stock
@@ -146,8 +154,7 @@ export async function updateTransaction(formData: FormData) {
     .single();
 
   if (!oldTx) {
-    console.error('No se encontró la transacción original');
-    return;
+    return { error: 'No se encontró la transacción original' };
   }
 
   const ignorar_balance = formData.get('ignorar_balance') === 'on';
@@ -168,8 +175,8 @@ export async function updateTransaction(formData: FormData) {
     .eq('id', id);
 
   if (error) {
-    console.error(error.message);
-    return;
+    console.error('Database Error:', error.message);
+    return { error: `Error en base de datos: ${error.message}` };
   }
 
   // Reconciliar stock si el tipo de movimiento cambió y está asociado a un producto
