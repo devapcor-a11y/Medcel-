@@ -40,7 +40,7 @@ export async function createTransaction(prevState: any, formData: FormData) {
     console.error('Error fetching exchange rate:', e);
   }
 
-  const payload = {
+  const payload: any = {
     tipo,
     monto,
     moneda,
@@ -48,10 +48,14 @@ export async function createTransaction(prevState: any, formData: FormData) {
     centro_destino_id,
     descripcion,
     producto_id,
-    ignorar_balance: tipo === 'gasto' ? ignorar_balance : false,
     cotizacion_usd: cotizacion,
     registrada_por: user.id,
   };
+
+  // Solo incluir ignorar_balance si es un gasto, para evitar errores si la columna no existe aún en la DB
+  if (tipo === 'gasto') {
+    payload.ignorar_balance = ignorar_balance;
+  }
 
   const { error } = await supabase.from('transacciones').insert([payload]);
 
@@ -159,15 +163,18 @@ export async function updateTransaction(prevState: any, formData: FormData) {
 
   const ignorar_balance = formData.get('ignorar_balance') === 'on';
 
-  const payload = {
+  const payload: any = {
     tipo,
     monto,
     moneda,
     centro_de_costos_id,
     centro_destino_id,
     descripcion,
-    ignorar_balance: tipo === 'gasto' ? ignorar_balance : false,
   };
+
+  if (tipo === 'gasto') {
+    payload.ignorar_balance = ignorar_balance;
+  }
 
   const { error } = await supabase
     .from('transacciones')
